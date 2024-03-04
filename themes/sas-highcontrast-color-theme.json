@@ -1,0 +1,29 @@
+{
+  "name": "SAS High Contrast",
+  "include": "./hc_black.json",
+  "semanticHighlighting": true,
+  "semanticTokenColors": {
+    "sep": { "foreground": "#fff" },
+    "keyword": { "foreground": "#c68aff" },
+    "sec-keyword": { "foreground": "#61a8fa", "bold": true },
+    "proc-name": { "foreground": "#61a8fa", "bold": true },
+    "comment": { "foreground": "#87b532" },
+    "macro-keyword": { "foreground": "#c68aff" },
+    "macro-comment": { "foreground": "#87b532" },
+    "macro-ref": { "foreground": "#fff", "bold": true },
+    "macro-sec-keyword": { "foreground": "#fff", "bold": true },
+    "cards-data": { "foreground": "#f98e39" },
+    "string": { "foreground": "#ff7973" },
+    "date": { "foreground": "#1fbba9", "bold": true },
+    "time": { "foreground": "#1fbba9", "bold": true },
+    "dt": { "foreground": "#1fbba9", "bold": true },
+    "bitmask": { "foreground": "#1fbba9", "bold": true },
+    "namelit": { "foreground": "#ff7973", "bold": true },
+    "hex": { "foreground": "#1fbba9", "bold": true },
+    "numeric": { "foreground": "#1fbba9", "bold": true },
+    "format": { "foreground": "#1fbba9" },
+    "error": { "foreground": "#f5a3a3" },
+    "warning": { "foreground": "#f2d08c" },
+    "note": { "foreground": "#8cc8f2" }
+  }
+}

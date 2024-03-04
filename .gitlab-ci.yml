@@ -1,0 +1,19 @@
+default:
+  tags:
+    - vscode
+
+stages:
+  - build
+
+build-job:
+  stage: build
+  tags:
+    - vscode
+  environment: development
+  script:
+    - npm install
+    - vsce package
+  artifacts:
+    paths: 
+      - sas-ca-*.vsix
+

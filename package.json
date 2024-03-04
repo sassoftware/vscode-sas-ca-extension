@@ -1,0 +1,543 @@
+{
+  "name": "sas-ca",
+  "displayName": "SAS Clinical Acceleration",
+  "description": "SAS Clinical Acceleration Extension for VS Code",
+  "version": "0.1.6",
+  "categories": [
+    "Programming Languages",
+    "Data Science",
+    "Machine Learning"
+  ],
+  "publisher": "SAS",
+  "license": "Apache-2.0",
+  "icon": "icons/hcaExtension.png",
+  "engines": {
+    "vscode": "^1.73.0"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./client/dist/node/extension",
+  "browser": "./client/dist/browser/extension",
+  "l10n": "./l10n",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
+  },
+  "contributes": {
+    "configuration": [
+      {
+        "properties": {
+          "SAS.ClinicalAcceleration.connectionProfiles": {
+            "order": 0,
+            "type": "object",
+            "description": "%configuration.SAS.ClinicalAcceleration.connectionProfiles%",
+            "properties": {
+              "activeProfile": {
+                "order": 0,
+                "type": "string",
+                "description": "%configuration.SAS.ClinicalAcceleration.connectionProfiles.activeProfile%",
+                "default": ""
+              },
+              "profiles": {
+                "order": 1,
+                "type": "object",
+                "description": "%configuration.SAS.ClinicalAcceleration.connectionProfiles.profiles%",
+                "additionalProperties": {
+                  "type": "object",
+                  "description": "%configuration.SAS.ClinicalAcceleration.connectionProfiles.profiles.name%",
+                  "required": [
+                    "connectionType"
+                  ],
+                  "properties": {
+                    "connectionType": {
+                      "type": "string",
+                      "default": "rest",
+                      "description": "%configuration.SAS.ClinicalAcceleration.connectionProfiles.profiles.connectionType%",
+                      "enum": [
+                        "rest"
+                      ]
+                    }
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "connectionType": {
+                            "const": "rest"
+                          }
+                        }
+                      },
+                      "then": {
+                        "required": [
+                          "endpoint"
+                        ],
+                        "properties": {
+                          "endpoint": {
+                            "type": "string",
+                            "default": "",
+                            "description": "%configuration.SAS.ClinicalAcceleration.connectionProfiles.profiles.endpoint%"
+                          },
+                          "context": {
+                            "type": "string",
+                            "default": "SAS Studio compute context",
+                            "description": "%configuration.SAS.ClinicalAcceleration.connectionProfiles.profiles.context%"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "SAS.ClinicalAcceleration.userProvidedCertificates": {
+            "order": 1,
+            "type": "array",
+            "description": "%configuration.SAS.ClinicalAcceleration.userProvidedCertificates%",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    ],
+    "commands": [
+      {
+        "command": "SAS.ClinicalAcceleration.switchProfile",
+        "title": "%commands.SAS.switchProfile%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.addProfile",
+        "title": "%commands.SAS.addProfile%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.deleteProfile",
+        "title": "%commands.SAS.deleteProfile%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.updateProfile",
+        "title": "%commands.SAS.updateProfile%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.authorize",
+        "title": "%commands.SAS.authorize%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.refreshRepositoryContent",
+        "title": "%commands.SAS.refresh%",
+        "category": "SAS Clinical Acceleration",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.collapseAllRepositoryContent",
+        "title": "%commands.SAS.collapseAll%",
+        "category": "SAS Clinical Acceleration",
+        "icon": "$(collapse-all)"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.downloadRepositoryResource",
+        "title": "%commands.SAS.download%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.refreshRepositoryProperties",
+        "title": "%commands.SAS.refresh%",
+        "category": "SAS Clinical Acceleration",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.uploadRepositoryResource",
+        "title": "%commands.SAS.upload%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.uploadAndExpandRepositoryResource",
+        "title": "%commands.SAS.uploadAndExpand%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.deleteRepositoryResource",
+        "title": "%commands.SAS.deleteResource%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.addRepositoryFolderResource",
+        "title": "%commands.SAS.addFolderResource%",
+        "category": "SAS Clinical Acceleration",
+        "icon": "$(new-folder)",
+        "enablement": "SAS.ClinicalAcceleration.containerSelected || (viewItem =~ /create/ && view == repositorydataprovider)"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.renameRepositoryResource",
+        "title": "%commands.SAS.renameResource%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.copyRepositoryResourcePath",
+        "title": "%commands.SAS.copyPath%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.enableRepositoryResourceVersioning",
+        "title": "%commands.SAS.enableVersioning%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.disableRepositoryResourceVersioning",
+        "title": "%commands.SAS.disableVersioning%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.refreshRepositoryVersionHistory",
+        "title": "%commands.SAS.refresh%",
+        "category": "SAS Clinical Acceleration",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.downloadRepositoryResourceVersion",
+        "title": "%commands.SAS.download%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.selectRepositoryResourceForComparison",
+        "title": "%commands.SAS.selectForComparison%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.compareRepositoryResourceWithSelected",
+        "title": "%commands.SAS.compareWithSelected%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.compareSelectedRepositoryResources",
+        "title": "%commands.SAS.compareSelected%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.selectRepositoryVersionForComparison",
+        "title": "%commands.SAS.selectVersionForComparison%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.compareRepositoryVersionWithSelected",
+        "title": "%commands.SAS.compareVersionWithSelected%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.compareSelectedRepositoryVersionResources",
+        "title": "%commands.SAS.compareSelected%",
+        "category": "SAS Clinical Acceleration"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "SAS.ClinicalAcceleration.addRepositoryFolderResource",
+          "when": "view == repositorydataprovider",
+          "group": "navigation@1"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.refreshRepositoryContent",
+          "when": "view == repositorydataprovider",
+          "group": "navigation@2"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.collapseAllRepositoryContent",
+          "when": "view == repositorydataprovider",
+          "group": "navigation@3"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.refreshRepositoryProperties",
+          "when": "view == propertyprovider",
+          "group": "navigation"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.refreshRepositoryVersionHistory",
+          "when": "view == versionhistoryprovider",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "SAS.ClinicalAcceleration.addRepositoryFolderResource",
+          "when": "viewItem =~ /create/ && view == repositorydataprovider",
+          "group": "addgroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.copyRepositoryResourcePath",
+          "when": "view == repositorydataprovider",
+          "group": "copygroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.enableRepositoryResourceVersioning",
+          "when": "viewItem =~ /-unversioned/ && view == repositorydataprovider && SAS.ClinicalAcceleration.oneItemSelected",
+          "group": "enableversiongroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.disableRepositoryResourceVersioning",
+          "when": "viewItem =~ /-versioned/ && view == repositorydataprovider && SAS.ClinicalAcceleration.oneItemSelected",
+          "group": "enableversiongroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.renameRepositoryResource",
+          "when": "viewItem =~ /update/ && view == repositorydataprovider",
+          "group": "renamegroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.deleteRepositoryResource",
+          "when": "viewItem =~ /delete/ && view == repositorydataprovider",
+          "group": "renamegroup@1"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.downloadRepositoryResource",
+          "when": "view == repositorydataprovider",
+          "group": "updowngroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.uploadRepositoryResource",
+          "when": "viewItem =~ /create/ && view == repositorydataprovider",
+          "group": "updowngroup@1"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.uploadAndExpandRepositoryResource",
+          "when": "viewItem =~ /create/ && view == repositorydataprovider",
+          "group": "updowngroup@2"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.selectRepositoryResourceForComparison",
+          "when": "viewItem =~ /compare/ && view == repositorydataprovider && !SAS.ClinicalAcceleration.twoItemsSelected",
+          "group": "comparegroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.compareRepositoryResourceWithSelected",
+          "when": "viewItem =~ /compare/ && view == repositorydataprovider && SAS.ClinicalAcceleration.itemSelected && !SAS.ClinicalAcceleration.twoItemsSelected",
+          "group": "comparegroup@1"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.compareSelectedRepositoryResources",
+          "when": "viewItem =~ /compare/ && view == repositorydataprovider && SAS.ClinicalAcceleration.twoItemsSelected",
+          "group": "comparegroup@2"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.selectRepositoryVersionForComparison",
+          "when": "viewItem =~ /version/ && view == versionhistoryprovider && !SAS.ClinicalAcceleration.twoVersionItemsSelected",
+          "group": "comparegroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.compareRepositoryVersionWithSelected",
+          "when": "viewItem =~ /version/ && view == versionhistoryprovider && SAS.ClinicalAcceleration.versionSelected && !SAS.ClinicalAcceleration.twoVersionItemsSelected",
+          "group": "comparegroup@1"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.compareSelectedRepositoryVersionResources",
+          "when": "viewItem =~ /version/ && view == versionhistoryprovider && SAS.ClinicalAcceleration.twoVersionItemsSelected",
+          "group": "comparegroup@2"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.downloadRepositoryResourceVersion",
+          "when": "view == versionhistoryprovider",
+          "group": "updowngroup@0"
+        }
+      ],
+      "commandPalette": [
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.deleteRepositoryResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.copyRepositoryResourcePath"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.addRepositoryFolderResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.renameRepositoryResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.refreshRepositoryContent"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.collapseAllRepositoryContent"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.downloadRepositoryResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.uploadRepositoryResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.uploadAndExpandRepositoryResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.refreshRepositoryProperties"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.refreshRepositoryVersionHistory"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.downloadRepositoryResourceVersion"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.selectRepositoryResourceForComparison"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.compareRepositoryResourceWithSelected"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.compareSelectedRepositoryResources"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.selectRepositoryVersionForComparison"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.compareRepositoryVersionWithSelected"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.compareSelectedRepositoryVersionResources"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.enableRepositoryResourceVersioning"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.disableRepositoryResourceVersioning"
+        }
+      ]
+    },
+    "themes": [
+      {
+        "label": "%themes.SAS.light%",
+        "uiTheme": "vs",
+        "path": "./themes/sas-light-color-theme.json"
+      },
+      {
+        "label": "%themes.SAS.dark%",
+        "uiTheme": "vs-dark",
+        "path": "./themes/sas-dark-color-theme.json"
+      },
+      {
+        "label": "%themes.SAS.highContrast%",
+        "uiTheme": "hc-black",
+        "path": "./themes/sas-highcontrast-color-theme.json"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "sas-ca-view-container",
+          "title": "SAS Clinical Acceleration",
+          "icon": "icons/dark/hcaExtension.svg"
+        }
+      ]
+    },
+    "views": {
+      "sas-ca-view-container": [
+        {
+          "id": "repositorydataprovider",
+          "name": "%views.SAS.repository%",
+          "when": "SAS.ClinicalAcceleration.authorized && SAS.ClinicalAcceleration.connectionType == rest"
+        },
+        {
+          "id": "sas-ca-content-get-started",
+          "name": "%views.SAS.signIn%",
+          "when": "(!SAS.ClinicalAcceleration.authorized && SAS.ClinicalAcceleration.connectionType == rest)"
+        },
+        {
+          "id": "propertyprovider",
+          "name": "%views.SAS.property%",
+          "when": "SAS.ClinicalAcceleration.authorized && SAS.ClinicalAcceleration.connectionType == rest"
+        },
+        {
+          "id": "versionhistoryprovider",
+          "name": "%views.SAS.versionHistory%",
+          "when": "SAS.ClinicalAcceleration.authorized && SAS.ClinicalAcceleration.connectionType == rest"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "sas-ca-content-get-started",
+        "when": "(!SAS.ClinicalAcceleration.authorized && SAS.ClinicalAcceleration.connectionType == rest)",
+        "contents": "%views.SAS.welcome%",
+        "enablement": "!SAS.ClinicalAcceleration.authorizing"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sassoftware/vscode-sas-ca-extension"
+  },
+  "bugs": {
+    "url": "https://github.com/sassoftware/vscode-sas-ca-extension/issues"
+  },
+  "homepage": "https://www.sas.com",
+  "qna": "https://marketplace.visualstudio.com/items?itemName=SAS.sas-ca&ssr=false#qna",
+  "scripts": {
+    "vscode:prepublish": "npm run lint && npm run compile && npm run compile-browser",
+    "lint": "node node_modules/eslint/bin/eslint.js \"./client/src/**/*.ts\"",
+    "compile": "node ./tools/build.mjs",
+    "watch": "node ./tools/build.mjs dev",
+    "compile-browser": "webpack --mode production",
+    "watch-browser": "webpack --watch",
+    "format:check": "prettier --check .",
+    "format": "prettier --write .",
+    "pretest": "npm run compile && tsc -p ./client",
+    "test": "node ./client/out/test/runTest.js",
+    "pseudoLocalize": "npx @vscode/l10n-dev export -o ./l10n ./client/src && npx @vscode/l10n-dev generate-pseudo -o ./l10n/ ./l10n/bundle.l10n.json ./package.nls.json",
+    "postinstall": "cd client && npm install && cd ..",
+    "copyright:check": "node ./tools/check-copyright.mjs",
+    "locale": "npx @vscode/l10n-dev export -o ./l10n ./client/src && node ./tools/locale.mjs"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.5",
+    "@types/sinon": "^17.0.3",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "@vscode/l10n-dev": "^0.0.31",
+    "chai": "^4.4.1",
+    "concurrently": "^8.2.2",
+    "esbuild": "^0.19.11",
+    "eslint": "^8.56.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "mocha": "^10.2.0",
+    "nock": "^13.5.0",
+    "path-browserify": "^1.0.1",
+    "prettier": "^3.2.4",
+    "sinon": "^17.0.1",
+    "ts-loader": "^9.5.1",
+    "ts-sinon": "^2.0.2",
+    "typescript": "^5.3.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  }
+}

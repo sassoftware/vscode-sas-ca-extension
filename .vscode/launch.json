@@ -1,0 +1,80 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "extensionHost",
+      "request": "launch",
+      "name": "Launch Client",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceRoot}"
+      ],
+      "outFiles": [
+        "${workspaceRoot}/client/dist/**/*.js"
+      ],
+      "preLaunchTask": {
+        "type": "npm",
+        "script": "watch"
+      }
+    },
+    {
+      "name": "Launch Browser",
+      "type": "pwa-extensionHost",
+      "debugWebWorkerHost": true,
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceRoot}",
+        "--extensionDevelopmentKind=web"
+      ],
+      "outFiles": [
+        "${workspaceRoot}/client/dist/**/*.js"
+      ],
+      "preLaunchTask": {
+        "type": "npm",
+        "script": "watch-browser"
+      }
+    },
+    {
+      "name": "E2E Test",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceRoot}",
+        "--extensionTestsPath=${workspaceRoot}/client/out/test",
+        "${workspaceRoot}/client/testFixture",
+        "--disable-extensions"
+      ],
+      "env": {
+        "testFile": "${relativeFile}"
+      },
+      "outFiles": [
+        "${workspaceRoot}/client/out/test/**/*.js"
+      ],
+      "preLaunchTask": {
+        "type": "npm",
+        "script": "pretest"
+      }
+    },
+    {
+      "type": "node-terminal",
+      "name": "Run Script: postinstall",
+      "request": "launch",
+      "command": "npm run postinstall",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "node-terminal",
+      "name": "JavaScript Debug Terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "node-terminal",
+      "name": "Run Script: vscode:prepublish",
+      "request": "launch",
+      "command": "npm run vscode:prepublish",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
