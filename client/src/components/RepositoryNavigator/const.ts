@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 import { l10n } from "vscode";
 
-export const REPOSITORY_ITEMS = "/healthClinicalAcceleration/repository/items";
-export const TYPES = "/healthClinicalAcceleration/types";
-export const AUTHORIZATIONS = "/healthClinicalAcceleration/authorizations";
-export const REPOSITORY_FILES_CONTENT = "/healthClinicalAcceleration/repository/files/content";
-export const REPOSITORY_ITEMS_BATCH = "/healthClinicalAcceleration/repository/items/batch";
-export const ACTION_STATUS = "/healthClinicalAcceleration/actionstatus";
+export const REPOSITORY_ITEMS = "/clinicalRepository/repository/items";
+export const TYPES = "/clinicalRepository/types";
+export const AUTHORIZATIONS = "/clinicalRepository/authorizations";
+export const REPOSITORY_FILES_CONTENT = "/clinicalRepository/repository/files/content";
+export const REPOSITORY_ITEMS_BATCH = "/clinicalRepository/repository/items/batch";
+export const ACTION_STATUS = "/clinicalRepository/actionstatus";
 
 const CONTENT_FOLDER_ID = "CONTENT_FOLDER_ID";
 export const ROOT_FOLDER_TYPE = "RootFolder";
@@ -40,7 +40,7 @@ export const Messages = {
   AccessPermissionsError: l10n.t('The item permissions cannot be accessed.'),
   AccessPrivilegesError: l10n.t('The item privileges cannot be accessed.'),
   CommentLengthValidationError: l10n.t("The comment cannot contain more than 1024 characters."),
-  CommentPrompt: l10n.t("Enter an optional comment for this upload."),
+  CommentPrompt: l10n.t("Enter an optional comment for this action."),
   CommentTitle: l10n.t("Comment"),
   DeleteButtonLabel: l10n.t("Delete"),
   DeleteError: l10n.t("There was an error in deleting the selected item(s)."),
@@ -87,7 +87,7 @@ export const Messages = {
   FolderRestoreError: l10n.t("Unable to restore folder."),
   ItemLocation: l10n.t('Location: {location}'),
   MovedToRecyleBinError: l10n.t('Unable to move "{name}" to the Recycle Bin. {message}'),
-  MovedToRecyleBinSuccess: l10n.t('Moved "{name}" to the Recycle Bin. You can restore it using the SAS Health Manage Data Repository application.'),
+  MovedToRecyleBinSuccess: l10n.t('Moved "{name}" to the Recycle Bin. You can restore it using the SAS Clinical Acceleration Manage Data Repository application.'),
   NewFolderCreationError: l10n.t('Unable to create folder "{name}".'),
   NewFolderPrompt: l10n.t("Enter a folder name."),
   NewFolderTitle: l10n.t("New Folder"),

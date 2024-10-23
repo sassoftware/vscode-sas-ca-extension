@@ -136,7 +136,7 @@ describe("VersionHistoryProvider", async function () {
       });
 
     const dataProvider = createDataProvider();
-    axiosInstance.get.withArgs("/healthClinicalAcceleration/repository/items/unique-id/versions/1.1").resolves({
+    axiosInstance.get.withArgs("/clinicalRepository/repository/items/unique-id/versions/1.1").resolves({
       data: file,
     });
 
@@ -161,7 +161,7 @@ describe("VersionHistoryProvider", async function () {
     const item = mockVersionHistoryItem();
     const dataProvider = createDataProvider();
 
-    axiosInstance.get.withArgs("/healthClinicalAcceleration/repository/items/unique-id/versions/1.1/content").resolves({
+    axiosInstance.get.withArgs("/clinicalRepository/repository/items/unique-id/versions/1.1/content").resolves({
       data: "versioned file content",
       headers: { etag: "1234", "last-modified": "1234" },
     });
@@ -177,7 +177,7 @@ describe("VersionHistoryProvider", async function () {
 
     const dataProvider = createDataProvider();
 
-    axiosInstance.get.withArgs("/healthClinicalAcceleration/repository/items/versions/1.1/content").resolves({
+    axiosInstance.get.withArgs("/clinicalRepository/repository/items/versions/1.1/content").resolves({
       data: "00000000: 5468 6973 2069 7320 6120 7465 7374 0a    This is a test."
     });
 
