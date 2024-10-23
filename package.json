@@ -10,7 +10,7 @@
   ],
   "publisher": "SAS",
   "license": "Apache-2.0",
-  "icon": "icons/hcaExtension.png",
+  "icon": "icons/sasCAMktplace.png",
   "engines": {
     "vscode": "^1.73.0"
   },
@@ -452,7 +452,7 @@
         {
           "id": "sas-ca-view-container",
           "title": "SAS Clinical Acceleration",
-          "icon": "icons/dark/hcaExtension.svg"
+          "icon": "icons/dark/sasCAMktplace.svg"
         }
       ]
     },

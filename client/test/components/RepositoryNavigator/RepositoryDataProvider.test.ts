@@ -149,7 +149,7 @@ describe("RepositoryDataProvider", async function () {
     const item: RepositoryItem = mockContentItem();
     const dataProvider = createDataProvider();
 
-    axiosInstance.get.withArgs("/healthClinicalAcceleration/types").resolves({
+    axiosInstance.get.withArgs("/clinicalRepository/types").resolves({
       data: [mockObjectType],
     });
 
@@ -179,7 +179,7 @@ describe("RepositoryDataProvider", async function () {
     const fileItem = mockContentItem();
     const dataProvider = createDataProvider();
 
-    axiosInstance.post.withArgs("/healthClinicalAcceleration/repository/items/unique-id/content")
+    axiosInstance.post.withArgs("/clinicalRepository/repository/items/unique-id/content")
       .resolves({
         data: "example file content",
         headers: { etag: "1234", "last-modified": "1234" },
@@ -203,7 +203,7 @@ describe("RepositoryDataProvider", async function () {
     const dataProvider = createDataProvider();
 
     axiosInstance.post
-      .withArgs("/healthClinicalAcceleration/repository/items/unique-id/children?name=test-folder&type=FOLDER")
+      .withArgs("/clinicalRepository/repository/items/unique-id/children?name=test-folder&type=FOLDER")
       .resolves({
         data: createdFolder,
       });
@@ -224,14 +224,14 @@ describe("RepositoryDataProvider", async function () {
       name: "renamed-file.sas",
     });
 
-    axiosInstance.get.withArgs("/healthClinicalAcceleration/repository/items/unique-id")
+    axiosInstance.get.withArgs("/clinicalRepository/repository/items/unique-id")
       .resolves({
         data: origItem,
         headers: { etag: "1234", "last-modified": "5678" },
       });
 
     axiosInstance.patch
-      .withArgs("/healthClinicalAcceleration/repository/items/unique-id",
+      .withArgs("/clinicalRepository/repository/items/unique-id",
         {
           name: "renamed-file.sas",
         })
@@ -256,7 +256,7 @@ describe("RepositoryDataProvider", async function () {
 
     const dataProvider = createDataProvider();
 
-    axiosInstance.delete.withArgs("/healthClinicalAcceleration/repository/items").resolves({ data: {} });
+    axiosInstance.delete.withArgs("/clinicalRepository/repository/items").resolves({ data: {} });
 
     await dataProvider.connect("http://test.io");
     const deleted = await dataProvider.deleteResource([item]);
@@ -271,7 +271,7 @@ describe("RepositoryDataProvider", async function () {
     });
 
     const dataProvider = createDataProvider();
-    axiosInstance.put.withArgs("/healthClinicalAcceleration/repository/items/unique-id?name=file.sas&expand=false").resolves({ data: item });
+    axiosInstance.put.withArgs("/clinicalRepository/repository/items/unique-id?name=file.sas&expand=false").resolves({ data: item });
 
     const fileToUpload = testFixturePath + "SampleCode.sas";
     await dataProvider.connect("http://test.io");
@@ -287,7 +287,7 @@ describe("RepositoryDataProvider", async function () {
     });
 
     const dataProvider = createDataProvider();
-    axiosInstance.put.withArgs("/healthClinicalAcceleration/repository/items/unique-id?name=file.sas&expand=false").resolves({ data: item });
+    axiosInstance.put.withArgs("/clinicalRepository/repository/items/unique-id?name=file.sas&expand=false").resolves({ data: item });
 
     const fileToUpload = testFixturePath + "SampleCode.sas";
     await dataProvider.connect("http://test.io");
@@ -304,7 +304,7 @@ describe("RepositoryDataProvider", async function () {
 
     const fileToUpload = testFixturePath + "sampleZip.zip";
     const dataProvider = createDataProvider();
-    axiosInstance.put.withArgs("/healthClinicalAcceleration/repository/items/unique-id?name=sampleZip.zip&expand=true").resolves({ data: {} });
+    axiosInstance.put.withArgs("/clinicalRepository/repository/items/unique-id?name=sampleZip.zip&expand=true").resolves({ data: {} });
 
     await dataProvider.connect("http://test.io");
     const uploaded = await dataProvider.uploadResource(item, [Uri.parse(fileToUpload)], true, '', '');
@@ -320,7 +320,7 @@ describe("RepositoryDataProvider", async function () {
 
     const fileToUpload = testFixturePath + "sampleZip.zip";
     const dataProvider = createDataProvider();
-    axiosInstance.put.withArgs("/healthClinicalAcceleration/repository/items/unique-id?name=sampleZip.zip.sas&expand=true").resolves({ data: {} });
+    axiosInstance.put.withArgs("/clinicalRepository/repository/items/unique-id?name=sampleZip.zip.sas&expand=true").resolves({ data: {} });
 
     await dataProvider.connect("http://test.io");
     const uploaded = await dataProvider.uploadResource(item, [Uri.parse(fileToUpload)], true, 'comment', '1.0');
@@ -336,7 +336,7 @@ describe("RepositoryDataProvider", async function () {
 
     const dataProvider = createDataProvider();
 
-    axiosInstance.post.withArgs("/healthClinicalAcceleration/repository/items/unique-id/content").resolves({
+    axiosInstance.post.withArgs("/clinicalRepository/repository/items/unique-id/content").resolves({
       data: "00000000: 5468 6973 2069 7320 6120 7465 7374 0a    This is a test."
     });
 
@@ -358,10 +358,10 @@ describe("RepositoryDataProvider", async function () {
 
     const action = mockActionStatus();
     const dataProvider = createDataProvider();
-    axiosInstance.post.withArgs("/healthClinicalAcceleration/repository/items/batch").resolves(
+    axiosInstance.post.withArgs("/clinicalRepository/repository/items/batch").resolves(
       { token: "123" }
     );
-    axiosInstance.post.withArgs("/healthClinicalAcceleration/actionstatus/123").resolves(
+    axiosInstance.post.withArgs("/clinicalRepository/actionstatus/123").resolves(
       {
         data: action
       });
@@ -379,10 +379,10 @@ describe("RepositoryDataProvider", async function () {
 
     const action = mockActionStatus();
     const dataProvider = createDataProvider();
-    axiosInstance.post.withArgs("/healthClinicalAcceleration/repository/items/batch").resolves(
+    axiosInstance.post.withArgs("/clinicalRepository/repository/items/batch").resolves(
       { token: "123" }
     );
-    axiosInstance.post.withArgs("/healthClinicalAcceleration/actionstatus/123").resolves(
+    axiosInstance.post.withArgs("/clinicalRepository/actionstatus/123").resolves(
       {
         data: action
       });
@@ -390,5 +390,5 @@ describe("RepositoryDataProvider", async function () {
     await dataProvider.connect("http://test.io");
     await dataProvider.disableVersioning(item, "this is a comment");
   });
-  
+
 });

@@ -75,7 +75,7 @@ To access SAS Clinical Acceleration repository content:
 
 ### Features
 
-The SAS Clinical Acceleration extension provides access to content that is stored within the managed content repository services of the SAS Health Clinical Acceleration services.
+The SAS Clinical Acceleration extension provides access to content that is stored within the managed content repository services of the SAS Clinical Acceleration services.
 
 #### Repository View
 
