@@ -38,6 +38,7 @@ export function throttle<T>(tasks: Array<() => Promise<T>>, limit: number) {
         return;
       }
       const task = tasks.shift();
+      if (!task) { return; }
       task().then((result) => {
         results[index] = result;
         ++count;

@@ -2,6 +2,7 @@ out
 dist
 node_modules
 .vscode-test*
+.user-data*
 *.vsix
 *.node
 l10n/bundle.l10n.json

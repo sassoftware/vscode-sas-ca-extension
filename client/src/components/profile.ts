@@ -118,8 +118,8 @@ const toAutoExecLinesFromPaths = (filePath: string): string[] => {
   try {
     const content = readFileSync(filePath, "utf8").split(/\n|\r\n/);
     lines.push(...content);
-  } catch (e) {
-    const err: Error = e;
+  } catch (e: any) {
+    const err: Error = e as Error;
     console.warn(
       `Error reading file: ${filePath}, error: ${err.message}, skipping...`,
     );
@@ -184,9 +184,10 @@ export class ProfileConfig {
    * @returns Boolean for pass or fail
    */
   validateSettings(): boolean {
-    const profileList: Dictionary<Profile> = workspace
+    const defineProfiles = workspace
       .getConfiguration(EXTENSION_CONFIG_KEY)
-      .get(EXTENSION_DEFINE_PROFILES_CONFIG_KEY)[EXTENSION_PROFILES_CONFIG_KEY];
+      .get<any>(EXTENSION_DEFINE_PROFILES_CONFIG_KEY);
+    const profileList: Dictionary<Profile> | undefined = defineProfiles?.[EXTENSION_PROFILES_CONFIG_KEY];
 
     if (!profileList) {
       workspace.getConfiguration(EXTENSION_CONFIG_KEY).update(
@@ -211,12 +212,11 @@ export class ProfileConfig {
     if (!this.validateSettings()) {
       return "";
     }
-    const activeProfile: string = workspace
+    const defineProfiles = workspace
       .getConfiguration(EXTENSION_CONFIG_KEY)
-      .get(EXTENSION_DEFINE_PROFILES_CONFIG_KEY)[
-      EXTENSION_ACTIVE_PROFILE_CONFIG_KEY
-    ];
-    return activeProfile;
+      .get<any>(EXTENSION_DEFINE_PROFILES_CONFIG_KEY);
+    const activeProfile: string | undefined = defineProfiles?.[EXTENSION_ACTIVE_PROFILE_CONFIG_KEY];
+    return activeProfile || "";
   }
 
   /**
@@ -228,11 +228,12 @@ export class ProfileConfig {
     if (!this.validateSettings()) {
       return {};
     }
-    const profileList: Dictionary<Profile> = workspace
+    const defineProfiles = workspace
       .getConfiguration(EXTENSION_CONFIG_KEY)
-      .get(EXTENSION_DEFINE_PROFILES_CONFIG_KEY)[EXTENSION_PROFILES_CONFIG_KEY];
+      .get<any>(EXTENSION_DEFINE_PROFILES_CONFIG_KEY);
+    const profileList: Dictionary<Profile> | undefined = defineProfiles?.[EXTENSION_PROFILES_CONFIG_KEY];
 
-    return profileList;
+    return profileList || {};
   }
 
   /**
@@ -300,7 +301,7 @@ export class ProfileConfig {
    * @param name {@link String} of the profile name
    * @returns Profile object
    */
-  getProfileByName<T extends Profile>(name: string): T {
+  getProfileByName<T extends Profile>(name: string): T | undefined {
     const profileList = this.getAllProfiles();
     if (name in profileList) {
       /* eslint-disable @typescript-eslint/consistent-type-assertions*/
@@ -384,7 +385,7 @@ export class ProfileConfig {
     const pv: ProfileValidation = {
       type: AuthType.Error,
       error: "",
-      profile: undefined,
+      profile: undefined as unknown as ViyaProfile,
     };
 
     //Validate active profile, return early if not valid
@@ -416,26 +417,26 @@ export class ProfileConfig {
    * @param name the {@link String} representation of the name of the profile
    */
   async prompt(name: string): Promise<void> {
-    const profile: Profile = this.getProfileByName(name);
+    const profile = this.getProfileByName<Profile>(name);
     let profileClone = { ...profile };
     if (!profile) {
       profileClone = {
         connectionType: ConnectionType.Rest,
-        endpoint: undefined,
-      };
+        endpoint: undefined as unknown as string,
+      } as any;
     }
 
-    profileClone.endpoint = await createInputTextBox(
+    const endpointValue = await createInputTextBox(
       ProfilePromptType.Endpoint,
       profileClone.endpoint,
     );
 
-    if (!profileClone.endpoint) {
+    if (!endpointValue) {
       return;
     }
-    profileClone.endpoint = profileClone.endpoint.replace(/\/$/, "");
+    profileClone.endpoint = endpointValue.replace(/\/$/, "");
 
-    await this.upsertProfile(name, profileClone);
+    await this.upsertProfile(name, profileClone as Profile);
   }
 
   /**
@@ -445,8 +446,8 @@ export class ProfileConfig {
    * @returns
    */
   remoteTarget(profileName: string): string {
-    const activeProfile = this.getProfileByName(profileName);
-    return activeProfile.endpoint;
+    const activeProfile = this.getProfileByName<Profile>(profileName);
+    return activeProfile?.endpoint || "";
   }
 }
 
@@ -496,9 +497,9 @@ export function getProfilePrompt(type: ProfilePromptType): ProfilePrompt {
  */
 export async function createInputTextBox(
   profilePromptType: ProfilePromptType,
-  defaultValue: string | undefined = null,
+  defaultValue: string | undefined = undefined,
   maskValue = false,
-): Promise<string> {
+): Promise<string | undefined> {
   const profilePrompt = getProfilePrompt(profilePromptType);
 
   const entered = await window.showInputBox({
@@ -521,7 +522,7 @@ export async function createInputTextBox(
 export async function createInputQuickPick(
   items: readonly string[] | Thenable<readonly string[]> = [],
   profilePromptType: ProfilePromptType,
-): Promise<string> {
+): Promise<string | undefined> {
   const profilePrompt = getProfilePrompt(profilePromptType);
 
   const options: QuickPickOptions = {

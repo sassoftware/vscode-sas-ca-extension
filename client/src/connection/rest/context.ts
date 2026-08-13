@@ -88,13 +88,18 @@ export class ComputeContext extends Compute {
 
     const options = this.getLinkOptions(link, { data: body });
 
-    let resp: AxiosResponse;
+    let resp: AxiosResponse | undefined;
     try {
       resp = await this.requestLink(link, options);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.message);
       }
+      throw error;
+    }
+
+    if (!resp) {
+      throw new Error(l10n.t("No response received from createSession"));
     }
 
     //Create the session from the http resposne

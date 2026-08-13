@@ -16,7 +16,7 @@ export const checkProfileAndAuthorize = async (): Promise<void> => {
       await authentication.getSession(SASAuthProvider.id, [], {
         createIfNone: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       window.showErrorMessage(error.message);
     }
   }

@@ -22,12 +22,12 @@ export function getTestFixtureContent(name: string): Buffer {
   return readFileSync(path.resolve(__dirname, "../../testFixture", name));
 }
 
-export const assertThrowsAsync = async (fn, expectedMsg?: string) => {
+export const assertThrowsAsync = async (fn: () => void | Promise<void>, expectedMsg?: string) => {
   try {
     await fn();
   } catch (err) {
     if (expectedMsg) {
-      const typedError: Error = err;
+      const typedError: Error = err as Error;
       assert.include(
         typedError.message,
         expectedMsg,

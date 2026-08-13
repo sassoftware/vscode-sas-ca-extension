@@ -3,6 +3,7 @@
 import {
   ConfigurationChangeEvent,
   ExtensionContext,
+  MarkdownString,
   StatusBarAlignment,
   StatusBarItem,
   authentication,
@@ -22,7 +23,7 @@ import {
 } from "../commands/profile";
 import { SASAuthProvider } from "../components/AuthProvider";
 import { installCAs } from "../components/CAHelper";
-import RepositoryNavigator from "../components/RepositoryNavigator";
+import ContentNavigator from "../components/ContentNavigator";
 import { setContext } from "../components/ExtensionContext";
 import { ConnectionType } from "../components/profile";
 
@@ -40,7 +41,7 @@ export function activate(context: ExtensionContext): void {
 
   setContext(context);
 
-  const repositoryNavigator = new RepositoryNavigator(context);
+  const contentNavigator = new ContentNavigator(context);
 
   context.subscriptions.push(
     commands.registerCommand("SAS.ClinicalAcceleration.switchProfile", switchProfile),
@@ -54,13 +55,23 @@ export function activate(context: ExtensionContext): void {
       new SASAuthProvider(context.secrets),
     ),
     activeProfileStatusBarIcon,
-    ...repositoryNavigator.getSubscriptions(),
+    ...contentNavigator.getSubscriptions(),
     // If configFile setting is changed, update watcher to watch new configuration file
     workspace.onDidChangeConfiguration((event: ConfigurationChangeEvent) => {
       if (event.affectsConfiguration("SAS.ClinicalAcceleration.connectionProfiles")) {
         triggerProfileUpdate();
       }
     }),
+    window.onDidChangeActiveTextEditor((editor) => {
+      let hideRunMenu = false;
+      
+      // Hide the run menu for any files opened from the repository.
+      if (editor && editor.document.uri.scheme === 'sasHca') {
+        hideRunMenu = true;
+      }
+      // This context boolean is used in the SAS Extension to hide or show the run menu.
+      commands.executeCommand("setContext", "SAS.hideRunMenuItem", hideRunMenu);
+    })
   );
 
   // Reset first to set "No Active Profiles"
@@ -108,12 +119,15 @@ async function updateStatusBarProfile(profileStatusBarIcon: StatusBarItem) {
   if (!activeProfile) {
     resetStatusBarItem(profileStatusBarIcon);
   } else {
-    const statusBarTooltip = profileConfig.remoteTarget(activeProfileName);
+    const targetUrl = profileConfig.remoteTarget(activeProfileName);
+    const tooltip = new MarkdownString(
+      `#### ${l10n.t("SAS Clinical Acceleration Profile")}\n\n${activeProfileName}\n\n${targetUrl}`);
+    tooltip.isTrusted = true;
 
     updateStatusBarItem(
       profileStatusBarIcon,
       `${activeProfileName}`,
-      `${activeProfileName}\n${statusBarTooltip}`,
+      tooltip,
     );
   }
 }
@@ -121,9 +135,9 @@ async function updateStatusBarProfile(profileStatusBarIcon: StatusBarItem) {
 function updateStatusBarItem(
   statusBarItem: StatusBarItem,
   text: string,
-  tooltip: string,
+  tooltip: string | MarkdownString,
 ): void {
-  statusBarItem.text = `$(cloud) ${text}`;
+  statusBarItem.text = `$(beaker) ${text}`;
   statusBarItem.tooltip = tooltip;
   statusBarItem.show();
 }

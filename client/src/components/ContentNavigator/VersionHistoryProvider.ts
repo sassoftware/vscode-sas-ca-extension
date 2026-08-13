@@ -36,24 +36,22 @@ class VersionHistoryProvider
   TreeDataProvider<VersionHistoryItem>,
   FileSystemProvider,
   SubscriptionProvider {
-  private _onDidChangeFile: EventEmitter<FileChangeEvent[]>;
-  private _onDidChangeTreeData: EventEmitter<VersionHistoryItem | undefined>;
-  private _onDidChange: EventEmitter<Uri>;
-  private _treeView: TreeView<VersionHistoryItem>;
-  private data: VersionHistoryItem[];
+  private readonly _onDidChangeFile: EventEmitter<FileChangeEvent[]>;
+  private readonly _onDidChangeTreeData: EventEmitter<VersionHistoryItem | undefined>;
+  private readonly _onDidChange: EventEmitter<Uri>;
+  private readonly _treeView: TreeView<VersionHistoryItem>;
+  private data: VersionHistoryItem[] = [];
   private readonly model: RepositoryModel;
-  private extensionUri: Uri;
 
   get treeView(): TreeView<VersionHistoryItem> {
     return this._treeView;
   }
 
-  constructor(model: RepositoryModel, extensionUri: Uri) {
+  constructor(model: RepositoryModel, _extensionUri: Uri) {
     this._onDidChangeFile = new EventEmitter<FileChangeEvent[]>();
     this._onDidChangeTreeData = new EventEmitter<VersionHistoryItem | undefined>();
     this._onDidChange = new EventEmitter<Uri>();
     this.model = model;
-    this.extensionUri = extensionUri;
 
     this._treeView = window.createTreeView("versionhistoryprovider", {
       treeDataProvider: this,
@@ -64,7 +62,7 @@ class VersionHistoryProvider
       if (this._treeView.visible) {
         const activeProfile: ViyaProfile = profileConfig.getProfileByName(
           profileConfig.getActiveProfile(),
-        );
+        ) as ViyaProfile;
         await this.connect(activeProfile.endpoint);
       }
     });
@@ -87,7 +85,7 @@ class VersionHistoryProvider
     return [this._treeView];
   }
 
-  get onDidChangeTreeData(): Event<VersionHistoryItem> {
+  get onDidChangeTreeData(): Event<VersionHistoryItem | undefined> {
     return this._onDidChangeTreeData.event;
   }
 
@@ -133,7 +131,13 @@ class VersionHistoryProvider
   }
 
   public async getMarkdownText(id?: string, version?: string, comment?: string) {
+    if (!id || !version) {
+      return new MarkdownString();
+    }
     const versionDetails = await this.model.getVersionHistoryItem(id, version);
+    if (!versionDetails) {
+      return new MarkdownString();
+    }
     const markdown = new MarkdownString();
 
     const formattedDate = formatDate(Date.parse(versionDetails.modifiedTimeStamp), "en-US");

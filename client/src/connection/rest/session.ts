@@ -62,15 +62,14 @@ export class ComputeSession extends Compute {
       return res.data;
     } else {
       throw new Error(
-        l10n.t("Error getting session with ID  {id} - {message}", {
+        l10n.t("Error getting session with ID {id}", {
           id,
-          message: res.message,
         }),
       );
     }
   }
 
-  async self<Session>(): Promise<Session> {
+  async self<T = Session>(): Promise<T> {
     if (this._self.id === undefined) {
       throw new Error(l10n.t("Cannot call self on ComputeSession with no id"));
     }
@@ -79,12 +78,11 @@ export class ComputeSession extends Compute {
     if (res.status === 200) {
       this._self = res.data;
       this.etag = res.headers.etag;
-      return res.data;
+      return res.data as unknown as T;
     } else {
       throw new Error(
-        l10n.t("Error getting server with ID  {id} - {message}", {
+        l10n.t("Error getting server with ID {id}", {
           id: this._self.id,
-          message: res.message,
         }),
       );
     }
@@ -118,7 +116,7 @@ export class ComputeSession extends Compute {
     if (this._self.links === undefined) {
       await this.self();
     }
-    const link = this.getLink(this._self.links, linkName);
+    const link = this.getLink(this._self.links || [], linkName);
     if (link === undefined) {
       throw new Error(
         l10n.t("Session does not have '{linkName}' link", { linkName }),
@@ -138,8 +136,8 @@ export class ComputeSession extends Compute {
     return this.api.updateSessionState(
       {
         sessionId: this.sessionId,
-        value: state,
-        ifMatch: this.etag,
+        value: state as "canceled" | "deleted",
+        ifMatch: this.etag || "",
       },
       { headers: { "Content-Type": "text/plain" } },
     );
@@ -233,7 +231,7 @@ export class ComputeSession extends Compute {
     //There is a chance that the job ended between our last read and now.
     //Need to make sure we clear out the log
 
-    let nextLink: Link = undefined;
+    let nextLink: Link | undefined = undefined;
     let resp = await this.logs.getSessionLog({
       sessionId: this.sessionId,
       start: start,

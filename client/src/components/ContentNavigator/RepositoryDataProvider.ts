@@ -49,13 +49,13 @@ class RepositoryDataProvider
   FileSystemProvider,
   TextDocumentContentProvider,
   SubscriptionProvider {
-  private _onDidChangeFile: EventEmitter<FileChangeEvent[]>;
-  private _onDidChangeTreeData: EventEmitter<RepositoryItem | undefined>;
-  private _onDidChange: EventEmitter<Uri>;
-  private _treeView: TreeView<RepositoryItem>;
+  private readonly _onDidChangeFile: EventEmitter<FileChangeEvent[]>;
+  private readonly _onDidChangeTreeData: EventEmitter<RepositoryItem | undefined>;
+  private readonly _onDidChange: EventEmitter<Uri>;
+  private readonly _treeView: TreeView<RepositoryItem>;
   private readonly model: RepositoryModel;
-  private extensionUri: Uri;
-  private baseUrl: string;
+  private readonly extensionUri: Uri;
+  private baseUrl: string = "";
 
   get treeView(): TreeView<RepositoryItem> {
     return this._treeView;
@@ -77,7 +77,7 @@ class RepositoryDataProvider
       if (this._treeView.visible) {
         const activeProfile: ViyaProfile = profileConfig.getProfileByName(
           profileConfig.getActiveProfile(),
-        );
+        ) as ViyaProfile;
         await this.connect(activeProfile.endpoint);
       }
     });
@@ -85,13 +85,13 @@ class RepositoryDataProvider
     this._treeView.onDidChangeSelection(async event => {
       commands.executeCommand(
         "setContext",
-        "SAS.ClinicalAcceleration.twoItemsSelected",
-        event.selection.length === 2
+        "SAS.ClinicalAcceleration.oneRepositoryItemSelected",
+        event.selection.length === 1
       );
       commands.executeCommand(
         "setContext",
-        "SAS.ClinicalAcceleration.oneItemSelected",
-        event.selection.length === 1
+        "SAS.ClinicalAcceleration.twoRepositoryItemsSelected",
+        event.selection.length === 2
       );
     });
   }
@@ -104,7 +104,7 @@ class RepositoryDataProvider
     return this._onDidChangeFile.event;
   }
 
-  get onDidChangeTreeData(): Event<RepositoryItem> {
+  get onDidChangeTreeData(): Event<RepositoryItem | undefined> {
     return this._onDidChangeTreeData.event;
   }
 
@@ -121,11 +121,12 @@ class RepositoryDataProvider
   public async getTreeItem(item: RepositoryItem): Promise<TreeItem> {
     const isContainer = getIsContainer(item);
     const uri = await this.getUri(item, false);
-
+    const type = this.model.getObjectType(item.typeId);
     return {
+      resourceUri: uri,
       iconPath: this.iconPathForItem(item),
-      contextValue: resourceType(item),
-      id: getId(item),
+      contextValue: await resourceType(item, type),
+      id: getId(item) ?? undefined,
       label: getName(item),
       collapsibleState: isContainer
         ? TreeItemCollapsibleState.Collapsed
@@ -176,7 +177,7 @@ class RepositoryDataProvider
   public async createFolder(
     item: RepositoryItem,
     folderName: string,
-  ): Promise<Uri> {
+  ): Promise<Uri | undefined> {
     return await this.model.createFolder(item, folderName)
       .then((newFolder) => {
         this.refresh();
@@ -185,7 +186,7 @@ class RepositoryDataProvider
             name: folderName,
             location: item.path
           }));
-        return getUri(newFolder);
+        return newFolder ? getUri(newFolder) : undefined;
       })
       .catch((error) => {
         EventFn(l10n.t(Messages.FolderCreationError,
@@ -201,12 +202,15 @@ class RepositoryDataProvider
   public async renameResource(
     item: RepositoryItem,
     name: string,
-  ): Promise<Uri> {
+  ): Promise<Uri | undefined> {
     const existingItem = await this.model.getResourceById(item.id);
+    if (!existingItem) {
+      return undefined;
+    }
     return this.model.renameResource(existingItem, name)
       .then(async (newItem) => {
-        const newUri = getUri(newItem);
-        if (await (closeFileIfOpen(item))) {
+        const newUri = newItem ? getUri(newItem) : undefined;
+        if (await (closeFileIfOpen(item)) && newUri) {
           commands.executeCommand("vscode.open", newUri);
         }
         EventFn(l10n.t(Messages.RenameSuccess,
@@ -258,7 +262,7 @@ class RepositoryDataProvider
     version?: string,
   ): Promise<boolean[]> {
     if (!item) {
-      return;
+      return [];
     }
 
     const uploadPromises = fileInfos.map(async file => {
@@ -266,7 +270,7 @@ class RepositoryDataProvider
       const buffer = readFileSync(filePath);
       return await this.model.uploadResource(item, filePath, buffer, expand, comment, version)
         .then(async (newItem) => {
-          if (item?.primaryType === 'FILE' && await closeFileIfOpen(newItem)) {
+          if (newItem && item?.primaryType === 'FILE' && await closeFileIfOpen(newItem)) {
             commands.executeCommand("vscode.open", getUri(newItem));
           }
           expand ?
@@ -302,15 +306,15 @@ class RepositoryDataProvider
     version?: string,
   ): Promise<boolean> {
     if (!item) {
-      return;
+      return false;
     }
 
     const body = {
-      comment: comment,
+      comment: comment || "",
       fileSpecifications: [
         {
           path: item.path,
-          fileVersion: version
+          fileVersion: version || ""
         }
       ]
     }
@@ -322,22 +326,22 @@ class RepositoryDataProvider
     comment?: string,
   ): Promise<boolean> {
     if (!item) {
-      return;
+      return false;
     }
     const body = {
-      comment: comment,
+      comment: comment || "",
       paths: [item.path]
     }
     return this.performVersioningAction(item, "DISABLE_VERSIONING", body);
   }
 
   private async performVersioningAction(item: RepositoryItem, action: Action, body: ActionBody): Promise<boolean> {
-    let success = Messages.EnabledVersioningSuccess;
-    let error = Messages.EnableVersioningError;
+    let successMessage = Messages.EnabledVersioningSuccess;
+    let errorMessage = Messages.EnableVersioningError;
 
     if (action === "DISABLE_VERSIONING") {
-      success = Messages.DisabledVersioningSuccess;
-      error = Messages.DisableVersioningError;
+      successMessage = Messages.DisabledVersioningSuccess;
+      errorMessage = Messages.DisableVersioningError;
     }
     return await this.model.performBatchAction(action, body)
       .then(async (token) => {
@@ -345,19 +349,19 @@ class RepositoryDataProvider
           {
             token: token,
           }).then((data: ActionStatus) => {
-            EventFn(l10n.t(success, {
+            EventFn(l10n.t(successMessage, {
               name: data.details[0].itemName
             }));
-           return true;
+            return true;
           })
           .catch((data: ActionStatus) => {
-            window.showWarningMessage(
-              l10n.t(error, {
+            window.showErrorMessage(
+              l10n.t(errorMessage, {
                 name: data.details[0].itemName,
                 message: data.details[0].message
               })
             );
-            EventFn(l10n.t(error, {
+            EventFn(l10n.t(errorMessage, {
               name: item.name,
               message: data.details[0].message
             }));
@@ -460,9 +464,9 @@ class RepositoryDataProvider
 
   private iconPathForItem(
     item: RepositoryItem,
-  ): ThemeIcon | { light: Uri; dark: Uri } {
+  ): ThemeIcon | { light: Uri; dark: Uri } | undefined {
     let icon = "";
-    const type = this.model.getObjectType(item.typeId).icon;
+    const type = this.model.getObjectType(item.typeId)?.icon;
     switch (type) {
       case 'ORGANIZATION':
         icon = "businessCompany";
@@ -473,6 +477,7 @@ class RepositoryDataProvider
       case 'ANALYSIS':
         icon = "analyze";
         break;
+      case 'CONTEXT':
       case 'ICON_1':
         icon = "application";
         break;
@@ -548,6 +553,12 @@ class RepositoryDataProvider
       case 'FILE_PDF':
         icon = "pdfFile";
         break;
+      case 'FILE_CJOB':
+        icon = "clinicalJobFile";
+        break;
+      case 'FILE_CMNF':
+        icon = "clinicalJobManifest";
+        break;
       case 'FILE_SASDATASET':
         icon = "sasDataSet";
         break;
@@ -568,6 +579,9 @@ class RepositoryDataProvider
         break;
       case 'FILE_AUDIO':
         icon = "audioFile";
+        break;
+      case 'FILE_JSON':
+        icon = "jsonFile";
         break;
       case 'FILE_CSV':
         icon = "csvFile";
@@ -613,15 +627,15 @@ class RepositoryDataProvider
         return undefined;
     }
 
-    return icon !== ""
-      ? {
+    return icon === ""
+      ? ThemeIcon.File
+      : {
         dark: Uri.joinPath(this.extensionUri, `icons/dark/${icon}Dark.svg`),
         light: Uri.joinPath(
           this.extensionUri,
           `icons/light/${icon}Light.svg`,
         ),
-      }
-      : ThemeIcon.File;
+      };
   }
 }
 
@@ -629,12 +643,12 @@ export default RepositoryDataProvider;
 
 const closeFileIfOpen = async (item: RepositoryItem) => {
   const fileUri = getUri(item, false);
-  const tabs: Tab[] = window.tabGroups.all.map((tg) => tg.tabs).flat();
+  const tabs: Tab[] = window.tabGroups.all.flatMap((tg) => tg.tabs);
   const tab = tabs.find(
-    (tab) =>
+    async (tab) =>
       (tab.input instanceof TabInputText ||
         tab.input instanceof TabInputNotebook) &&
-      tab.input.uri.query === fileUri.query,
+      tab.input.uri.query === (await fileUri).query,
   );
   if (tab) {
     return await window.tabGroups.close(tab);

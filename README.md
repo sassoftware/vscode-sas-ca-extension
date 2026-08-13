@@ -2,20 +2,21 @@
 
 Welcome to the SAS Clinical Acceleration Extension for Visual Studio Code! This extension provides support for the SAS Clinical Acceleration repository including the following features:
 
-- [SAS Clinical Acceleration Extension for Visual Studio Code](#sas-ca-extension-for-visual-studio-code)
+- [SAS Clinical Acceleration Extension for Visual Studio Code](#sas-clinical-acceleration-extension-for-visual-studio-code)
   - [Installation](#installation)
-  - [Configuring the SAS Clinical Acceleration Extension](#configuring-the-sas-extension)
+  - [Configuring the SAS Clinical Acceleration Extension](#configuring-the-sas-clinical-acceleration-extension)
     - [Setting Up Profiles](#setting-up-profiles)
     - [Accessing SAS Clinical Acceleration Content](#accessing-sas-clinical-acceleration-content)
   - [Features](#features)
     - [Repository View](#repository-view)
+    - [Workspace View](#workspace-view)
     - [Properties View](#properites-view)
     - [Version History View](#version-history-view)
   - [Support](#support)
     - [SAS Communities](#sas-communities)
     - [FAQs](#faqs)
     - [GitHub Issues](#github-issues)
-  - [Contributing to the SAS Clinical Acceleration Extension](#contributing-to-the-sas-clinical-acceleration-repository-extension)
+  - [Contributing to the SAS Clinical Acceleration Extension](#contributing-to-the-sas-clinical-acceleration-extension)
   - [License](#license)
 
 ## Overview
@@ -65,21 +66,25 @@ Details about creating and managing profiles is available on the [Connect and Ru
 
 #### Accessing SAS Clinical Acceleration Content
 
-After configuring the SAS Clinical Acceleration extension for a SAS Viya environment, you can access the SAS Clinical Acceleration repository content.
+After configuring the SAS Clinical Acceleration extension for a SAS Viya environment, you can access the SAS Clinical Acceleration content.
 
-To access SAS Clinical Acceleration repository content:
+To access SAS Clinical Acceleration content:
 
 1. Click the SAS Clinical Acceleration icon in VSCode's activity bar.
 2. Click Sign In.
-3. You can browse and view the repository content that is displayed, and peform actions based on the content type.
+3. You can browse and view the content that is displayed, and peform actions based on the content type.
 
 ### Features
 
-The SAS Clinical Acceleration extension provides access to content that is stored within the managed content repository services of the SAS Clinical Acceleration services.
+The SAS Clinical Acceleration extension provides access to content that is stored within the managed content services of the SAS Clinical Acceleration services.
 
 #### Repository View
 
-The Repository view is the primary view for interacting with the content in the repository. From this view, you can view, upload, download, and compare content. Access to functions is provided via context menus or the toolbar.
+The Repository view is the primary view for interacting with the content in the repository. From this view, you can view, upload, download, and compare content. Access to functions is provided via context menus or the toolbar. Content in the repository is read-only and can only be edited by interacting with through the Workspace view.
+
+#### Workspace View
+
+The Workspace view is where content from the Repository as well as new content can be created and edited. From this view, you can interact with the workspace by copying and/or checking out content from the repository Through the workspace you can also create, save, view, upload, download, and compare content. Access to functions is provided via context menus or the toolbar.
 
 #### Properties View
 
@@ -87,7 +92,7 @@ As you navigate the Repository view and select items, the Properties view displa
 
 #### Version History View
 
-As previously noted, the SAS Clinical Acceleration extension repository contains managed content. Items in the repository can be versioned as the data changes over time. In the Version History view, you can view the metadata for specific changes that might have been made to a selected item in the Repository view. Some items are not versionable, such as folder and contexts, and files are not always versioned. If an item has been versioned, the history of changes is represented in this view, which enables you to open and view any of the specific versions. You can also compare versions and compare a specific version to a file in the Repository view.
+As previously noted, the SAS Clinical Acceleration extension repository contains managed content. Items in the repository can be versioned as the data changes over time. In the Version History view, you can view the metadata for specific changes that might have been made to a selected item in the Repository view. Some items are not versionable, such as folder and contexts, and files are not always versioned. If an item has been versioned, the history of changes is represented in this view, which enables you to open and view any of the specific versions. You can also compare versions and compare a specific version to a file in the Repository view or Workspace view as well as copy a specific version to the Workspace.
 
 ## Support
 

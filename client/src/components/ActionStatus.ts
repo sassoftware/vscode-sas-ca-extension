@@ -1,6 +1,6 @@
-import axios, { AxiosInstance } from 'axios';
-import { ACTION_STATUS } from './RepositoryNavigator/const';
-import { ACTION_STATUS_MEDIA_TYPE, ACTION_SUMMARY_MEDIA_TYPE, ActionStatus } from './RepositoryNavigator/types';
+import { AxiosInstance } from 'axios';
+import { ACTION_STATUS } from './ContentNavigator/const';
+import { ACTION_STATUS_MEDIA_TYPE, ACTION_SUMMARY_MEDIA_TYPE, ActionStatus } from './ContentNavigator/types';
 
 const POLLING_INTERVAL = 2000;
 export type ActionPollingParams = {
@@ -50,13 +50,8 @@ const getPollingPromise = (token: string) =>
           }
         })
         .catch((error) => {
-          try {
-            if (!axios.isCancel(error)) {
-              throw error;
-            }
-          } catch (error) {
-            endPolling(action.token);
-          }
+          endPolling(action.token);
+          reject(error);
         });
     }, POLLING_INTERVAL);
   });

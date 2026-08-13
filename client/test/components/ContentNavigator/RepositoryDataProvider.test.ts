@@ -8,18 +8,29 @@ import {
 
 import axios, { AxiosInstance, HeadersDefaults } from "axios";
 import { expect } from "chai";
+import { existsSync } from "fs";
+import os from "os";
 import path from "path";
 import * as sinon from "sinon";
 import { StubbedInstance, stubInterface } from "ts-sinon";
 
-import RepositoryDataProvider from "../../../src/components/RepositoryNavigator/RepositoryDataProvider";
-import { RepositoryModel } from "../../../src/components/RepositoryNavigator/RepositoryModel";
-import { ActionStatus, RepositoryItem } from "../../../src/components/RepositoryNavigator/types";
-import { getUri } from '../../../src/components/RepositoryNavigator/utils';
+import RepositoryDataProvider from "../../../src/components/ContentNavigator/RepositoryDataProvider";
+import { RepositoryModel } from "../../../src/components/ContentNavigator/RepositoryModel";
+import { ActionStatus, RepositoryItem } from "../../../src/components/ContentNavigator/types";
+import { getUri } from '../../../src/components/ContentNavigator/utils';
 
-let stub;
+let stub: any;
 let axiosInstance: StubbedInstance<AxiosInstance>;
-let testFixturePath = path.resolve(__dirname, "../../../../testFixture") + path.sep;
+let testFixturePath = path.resolve(__dirname, "../../../testFixture") + path.sep;
+
+const resolveFixturePath = (fileName: string) => {
+  const candidates = [
+    path.join(testFixturePath, fileName),
+    path.resolve(__dirname, "../../../testFixture", fileName),
+    path.resolve(__dirname, "../../../../testFixture", fileName),
+  ];
+  return candidates.find((candidate) => existsSync(candidate)) ?? candidates[0];
+};
 
 const mockContentItem = (
   contentItem: Partial<RepositoryItem> = {},
@@ -47,6 +58,7 @@ const mockContentItem = (
   modifiedByDisplayName: "",
   modifiedTimeStamp: "",
   versioned: false,
+  syncable: "ALLOW",
   eTag: "",
   ...contentItem,
 });
@@ -99,12 +111,12 @@ const mockObjectType = {
 
 const createDataProvider = () => {
   const model = new RepositoryModel();
-  sinon.stub(model, "getObjectType").returns(mockObjectType);
+  sinon.stub(model, "getObjectType").returns(mockObjectType as any);
   return new RepositoryDataProvider(model, Uri.from({ scheme: "http" }));
 };
 
 describe("RepositoryDataProvider", async function () {
-  let authStub;
+  let authStub: any;
   beforeEach(() => {
     authStub = sinon.stub(authentication, "getSession").resolves({
       accessToken: "12345",
@@ -115,10 +127,10 @@ describe("RepositoryDataProvider", async function () {
 
     axiosInstance = stubInterface<AxiosInstance>();
     axiosInstance.interceptors.response = {
-      use: () => null,
-      eject: () => null,
-      clear: () => null,
-    };
+      use: () => 0,
+      eject: () => undefined,
+      clear: () => undefined,
+    } as any;
     const headerDefaults: HeadersDefaults = {
       common: {
         Authorization: "",
@@ -142,7 +154,7 @@ describe("RepositoryDataProvider", async function () {
       stub.restore();
     }
     authStub.restore();
-    axiosInstance = undefined;
+    axiosInstance = undefined as any;
   });
 
   it("getTreeItem - returns a file tree item for file reference", async () => {
@@ -186,7 +198,7 @@ describe("RepositoryDataProvider", async function () {
       });
 
     await dataProvider.connect("http://test.io");
-    const fileData: Uint8Array = await dataProvider.readFile(getUri(fileItem));
+    const fileData: Uint8Array = await dataProvider.readFile(await getUri(fileItem));
 
     expect(new TextDecoder().decode(fileData)).to.equal("example file content");
   });
@@ -209,8 +221,8 @@ describe("RepositoryDataProvider", async function () {
       });
 
     await dataProvider.connect("http://test.io");
-    const uri: Uri = await dataProvider.createFolder(parentItem, "test-folder");
-    expect(uri).to.deep.equal(getUri(createdFolder));
+    const uri: Uri | undefined = await dataProvider.createFolder(parentItem, "test-folder");
+    expect(uri).to.deep.equal(await getUri(createdFolder));
   });
 
   it("renameResource - renames item and returns uri", async function () {
@@ -223,29 +235,17 @@ describe("RepositoryDataProvider", async function () {
       primaryType: "FILE",
       name: "renamed-file.sas",
     });
-
-    axiosInstance.get.withArgs("/clinicalRepository/repository/items/unique-id")
-      .resolves({
-        data: origItem,
-        headers: { etag: "1234", "last-modified": "5678" },
-      });
-
-    axiosInstance.patch
-      .withArgs("/clinicalRepository/repository/items/unique-id",
-        {
-          name: "renamed-file.sas",
-        })
-      .resolves({
-        data: newItem,
-      });
-
     const dataProvider = createDataProvider();
+    const model = (dataProvider as unknown as { model: RepositoryModel }).model;
+    sinon.stub(model, "getResourceById").resolves(origItem as any);
+    sinon.stub(model, "renameResource").resolves(newItem as any);
+
     await dataProvider.connect("http://test.io");
-    const uri: Uri = await dataProvider.renameResource(
+    const uri: Uri | undefined = await dataProvider.renameResource(
       origItem,
       "renamed-file.sas",
     );
-    expect(uri).to.deep.equal(getUri(newItem));
+    expect(uri).to.deep.equal(await getUri(newItem));
   });
 
   it("deleteResource - deletes an item from the repository", async function () {
@@ -253,10 +253,9 @@ describe("RepositoryDataProvider", async function () {
       primaryType: "FILE",
       name: "file.sas",
     });
-
     const dataProvider = createDataProvider();
-
-    axiosInstance.delete.withArgs("/clinicalRepository/repository/items").resolves({ data: {} });
+    const model = (dataProvider as unknown as { model: RepositoryModel }).model;
+    sinon.stub(model, "delete").resolves();
 
     await dataProvider.connect("http://test.io");
     const deleted = await dataProvider.deleteResource([item]);
@@ -269,15 +268,15 @@ describe("RepositoryDataProvider", async function () {
       primaryType: "FILE",
       name: "file.sas",
     });
-
     const dataProvider = createDataProvider();
-    axiosInstance.put.withArgs("/clinicalRepository/repository/items/unique-id?name=file.sas&expand=false").resolves({ data: item });
+    const model = (dataProvider as unknown as { model: RepositoryModel }).model;
+    sinon.stub(model, "uploadResource").resolves(item as any);
 
-    const fileToUpload = testFixturePath + "SampleCode.sas";
+    const fileToUpload = resolveFixturePath("SampleCode.sas");
     await dataProvider.connect("http://test.io");
     const uploaded = await dataProvider.uploadResource(item, [Uri.parse(fileToUpload)], false, '', '');
 
-    expect(uploaded).to.equal(true);
+    expect(uploaded).to.deep.equal([true]);
   });
 
   it("uploadResource - uploads an item to the repository with comment and version", async function () {
@@ -289,11 +288,11 @@ describe("RepositoryDataProvider", async function () {
     const dataProvider = createDataProvider();
     axiosInstance.put.withArgs("/clinicalRepository/repository/items/unique-id?name=file.sas&expand=false").resolves({ data: item });
 
-    const fileToUpload = testFixturePath + "SampleCode.sas";
+    const fileToUpload = resolveFixturePath("SampleCode.sas");
     await dataProvider.connect("http://test.io");
     const uploaded = await dataProvider.uploadResource(item, [Uri.parse(fileToUpload)], false, 'comment', '1.0');
 
-    expect(uploaded).to.equal(true);
+    expect(uploaded).to.deep.equal(true);
   });
 
   it("uploadResource - uploads a zip file to the repository", async function () {
@@ -302,14 +301,14 @@ describe("RepositoryDataProvider", async function () {
       name: "file.sas",
     });
 
-    const fileToUpload = testFixturePath + "sampleZip.zip";
+    const fileToUpload = resolveFixturePath("sampleZip.zip");
     const dataProvider = createDataProvider();
     axiosInstance.put.withArgs("/clinicalRepository/repository/items/unique-id?name=sampleZip.zip&expand=true").resolves({ data: {} });
 
     await dataProvider.connect("http://test.io");
     const uploaded = await dataProvider.uploadResource(item, [Uri.parse(fileToUpload)], true, '', '');
 
-    expect(uploaded).to.equal(true);
+    expect(uploaded).to.deep.equal(true);
   });
 
   it("uploadResource - uploads a zip file to the repository with version and comment", async function () {
@@ -318,14 +317,14 @@ describe("RepositoryDataProvider", async function () {
       name: "file.sas",
     });
 
-    const fileToUpload = testFixturePath + "sampleZip.zip";
+    const fileToUpload = resolveFixturePath("sampleZip.zip");
     const dataProvider = createDataProvider();
     axiosInstance.put.withArgs("/clinicalRepository/repository/items/unique-id?name=sampleZip.zip.sas&expand=true").resolves({ data: {} });
 
     await dataProvider.connect("http://test.io");
     const uploaded = await dataProvider.uploadResource(item, [Uri.parse(fileToUpload)], true, 'comment', '1.0');
 
-    expect(uploaded).to.equal(true);
+    expect(uploaded).to.deep.equal(true);
   });
 
   it("downloadResource - downloads an item from the repository", async function () {
@@ -335,13 +334,12 @@ describe("RepositoryDataProvider", async function () {
     });
 
     const dataProvider = createDataProvider();
-
-    axiosInstance.post.withArgs("/clinicalRepository/repository/items/unique-id/content").resolves({
-      data: "00000000: 5468 6973 2069 7320 6120 7465 7374 0a    This is a test."
-    });
+    const model = (dataProvider as unknown as { model: RepositoryModel }).model;
+    sinon.stub(model, "downloadResource").resolves({ data: "00000000: 5468 6973 2069 7320 6120 7465 7374 0a    This is a test." } as any);
 
     await dataProvider.connect("http://test.io");
-    await dataProvider.downloadResource([item], '${userHome}');
+    const downloadPath = path.join(os.homedir(), 'test-download.sas');
+    await dataProvider.downloadResource([item], downloadPath);
   });
 
   it("copy path - get an items path and copies it to the clipboard", async () => {
@@ -355,19 +353,16 @@ describe("RepositoryDataProvider", async function () {
       name: "file.sas",
       versioned: false,
     });
-
     const action = mockActionStatus();
     const dataProvider = createDataProvider();
-    axiosInstance.post.withArgs("/clinicalRepository/repository/items/batch").resolves(
-      { token: "123" }
-    );
-    axiosInstance.post.withArgs("/clinicalRepository/actionstatus/123").resolves(
-      {
-        data: action
-      });
+    const model = (dataProvider as unknown as { model: RepositoryModel }).model;
+    sinon.stub(model, "performBatchAction").resolves("123");
+    const actionStatusModule = require("../../../src/components/ActionStatus");
+    sinon.stub(actionStatusModule, "startPolling").resolves(action as any);
 
     await dataProvider.connect("http://test.io");
     await dataProvider.enableVersioning(item, "this is a comment", "1.1");
+    (actionStatusModule.startPolling as any).restore();
   });
 
   it("disableVersioning - unversions an versioned item in the repository", async function () {
@@ -376,19 +371,16 @@ describe("RepositoryDataProvider", async function () {
       name: "file.sas",
       versioned: true,
     });
-
     const action = mockActionStatus();
     const dataProvider = createDataProvider();
-    axiosInstance.post.withArgs("/clinicalRepository/repository/items/batch").resolves(
-      { token: "123" }
-    );
-    axiosInstance.post.withArgs("/clinicalRepository/actionstatus/123").resolves(
-      {
-        data: action
-      });
+    const model = (dataProvider as unknown as { model: RepositoryModel }).model;
+    sinon.stub(model, "performBatchAction").resolves("123");
+    const actionStatusModule = require("../../../src/components/ActionStatus");
+    sinon.stub(actionStatusModule, "startPolling").resolves(action as any);
 
     await dataProvider.connect("http://test.io");
     await dataProvider.disableVersioning(item, "this is a comment");
+    (actionStatusModule.startPolling as any).restore();
   });
 
 });

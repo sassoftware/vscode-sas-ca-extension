@@ -56,7 +56,7 @@ export class ComputeServer extends Compute {
     return _server;
   }
 
-  async self<Server>(): Promise<Server> {
+  async self<T = Server>(): Promise<T> {
     if (this._self.id === undefined) {
       throw new Error(l10n.t("Cannot call self on object with no id"));
     }
@@ -65,12 +65,11 @@ export class ComputeServer extends Compute {
     if (res.status === 200) {
       this._self = res.data;
       this.etag = res.headers.etag;
-      return res.data;
+      return res.data as unknown as T;
     } else {
       throw new Error(
-        l10n.t("Error getting server with ID  {id} - {message}", {
+        l10n.t("Error getting server with ID {id}", {
           id: this.id,
-          message: res.message,
         }),
       );
     }
@@ -95,18 +94,23 @@ export class ComputeServer extends Compute {
       description: "This is a session",
       attributes: {},
       environment: {
-        options: [...DEFAULT_COMPUTE_OPTS, ...this._options],
+        options: [...DEFAULT_COMPUTE_OPTS, ...(this._options || [])],
         autoExecLines: this._autoExecLines || [],
       },
     };
 
-    let resp: AxiosResponse;
+    let resp: AxiosResponse | undefined;
     try {
       resp = await this.requestLink(link, { data: body });
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.message);
       }
+      throw error;
+    }
+
+    if (!resp) {
+      throw new Error(l10n.t("No response received from createSession"));
     }
 
     //Create the session from the http resposne
@@ -130,10 +134,10 @@ export class ComputeServer extends Compute {
     }
 
     const params: { timeout?: number } = {};
-    const headers = {};
+    const headers: { [key: string]: string } = {};
 
     if (options !== undefined) {
-      if (options.onChange) {
+      if (options.onChange && this.etag) {
         headers["If-None-Match"] = this.etag;
       }
 
@@ -142,7 +146,7 @@ export class ComputeServer extends Compute {
       }
     }
 
-    const link = this.getLink(this._self.links, "state");
+    const link = this.getLink(this._self.links || [], "state");
     if (link === undefined) {
       throw new Error(l10n.t("Server does not have state link"));
     }

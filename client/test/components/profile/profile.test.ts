@@ -16,25 +16,36 @@ import {
 let testProfileName: string;
 let testProfileNewName: string;
 let profileConfig: ProfileConfig;
-let testProfileClientId;
-let testOverloadedProfile;
-let testEmptyProfile;
-let testEmptyItemsProfile;
-let legacyProfile;
+let testProfileClientId: any;
+let testOverloadedProfile: any;
+let testEmptyProfile: any;
+let testEmptyItemsProfile: any;
+let legacyProfile: any;
 
 async function initProfile(): Promise<void> {
   profileConfig = new ProfileConfig();
 }
 
+async function updateProfileSetting(value: any): Promise<void> {
+  await workspace
+    .getConfiguration(EXTENSION_CONFIG_KEY)
+    .update(EXTENSION_DEFINE_PROFILES_CONFIG_KEY, value, ConfigurationTarget.Global);
+}
+
 describe("Profiles", async function () {
   before(async () => {
-    workspace
-      .getConfiguration(EXTENSION_CONFIG_KEY)
-      .update(
-        EXTENSION_DEFINE_PROFILES_CONFIG_KEY,
-        undefined,
-        ConfigurationTarget.Global,
-      );
+    await updateProfileSetting(undefined);
+    legacyProfile = {
+      activeProfile: "testViyaProfile",
+      profiles: {
+        testViyaProfile: {
+          endpoint: "https://legacy-host.sas.com/",
+          context: "SAS Studio context",
+          clientId: "sas.test",
+          clientSecret: "",
+        },
+      },
+    };
     testProfileClientId = {
       activeProfile: "",
       profiles: {
@@ -91,28 +102,16 @@ describe("Profiles", async function () {
 
   describe("Legacy Profile", async function () {
     beforeEach(async () => {
-      initProfile();
-      workspace
-        .getConfiguration(EXTENSION_CONFIG_KEY)
-        .update(
-          EXTENSION_DEFINE_PROFILES_CONFIG_KEY,
-          legacyProfile,
-          ConfigurationTarget.Global,
-        );
+      await initProfile();
+      await updateProfileSetting(legacyProfile);
     });
 
     this.afterEach(async () => {
-      workspace
-        .getConfiguration(EXTENSION_CONFIG_KEY)
-        .update(
-          EXTENSION_DEFINE_PROFILES_CONFIG_KEY,
-          undefined,
-          ConfigurationTarget.Global,
-        );
+      await updateProfileSetting(undefined);
     });
 
     it("adds connectionType to legacy profiles", async () => {
-      profileConfig.migrateLegacyProfiles();
+      await profileConfig.migrateLegacyProfiles();
 
       const profiles = profileConfig.getAllProfiles();
       expect(Object.keys(profiles).length).to.be.greaterThan(0);
@@ -126,7 +125,7 @@ describe("Profiles", async function () {
     });
 
     it("removes trailing slash from endpoint on legacy profiles", async () => {
-      profileConfig.migrateLegacyProfiles();
+      await profileConfig.migrateLegacyProfiles();
 
       const profiles = profileConfig.getAllProfiles();
       expect(Object.keys(profiles).length).to.be.greaterThan(0);
@@ -148,7 +147,7 @@ describe("Profiles", async function () {
       const profileByName = profileConfig.getProfileByName("testViyaProfile");
       const validateProfile = profileConfig.validateProfile({
         name: testProfileName,
-        profile: profileByName,
+        profile: profileByName as ViyaProfile,
       });
 
       expect(validateProfile.data).to.equal(undefined);
@@ -166,7 +165,7 @@ describe("Profiles", async function () {
   describe("No Profile", async function () {
     beforeEach(async () => {
       testProfileNewName = "testProfile";
-      initProfile();
+      await initProfile();
     });
     describe("CRUD Operations", async function () {
       it("validate initial state", async function () {
@@ -175,7 +174,7 @@ describe("Profiles", async function () {
       });
 
       it("add a new viya profile", async function () {
-        profileConfig.upsertProfile(testProfileNewName, {
+        await profileConfig.upsertProfile(testProfileNewName, {
           connectionType: ConnectionType.Rest,
           endpoint: "https://test-host.sas.com",
           context: "SAS Studio context",
@@ -198,19 +197,13 @@ describe("Profiles", async function () {
     beforeEach(async () => {
       testProfileName = "testProfile";
       testProfileNewName = "testProfile2";
-      initProfile();
-      workspace
-        .getConfiguration(EXTENSION_CONFIG_KEY)
-        .update(
-          EXTENSION_DEFINE_PROFILES_CONFIG_KEY,
-          testProfileClientId,
-          ConfigurationTarget.Global,
-        );
+      await initProfile();
+      await updateProfileSetting(testProfileClientId);
     });
 
     describe("CRUD Operations", async function () {
       it("add a new profile", async function () {
-        profileConfig.upsertProfile(testProfileNewName, {
+        await profileConfig.upsertProfile(testProfileNewName, {
           endpoint: "https://test-host.sas.com",
           context: "SAS Studio context",
           connectionType: ConnectionType.Rest,
@@ -231,7 +224,7 @@ describe("Profiles", async function () {
       });
 
       it("delete a profile", async function () {
-        profileConfig.deleteProfile(testProfileName);
+        await profileConfig.deleteProfile(testProfileName);
         const profiles = profileConfig.listProfile();
         expect(profiles).to.have.length(0);
       });
@@ -246,7 +239,7 @@ describe("Profiles", async function () {
 
       it("get profile by name", async function () {
         const testProfile: ViyaProfile =
-          profileConfig.getProfileByName(testProfileName);
+          profileConfig.getProfileByName(testProfileName) as ViyaProfile;
         expect(testProfile.endpoint).to.equal(
           "https://test-host.sas.com",
           "Host is not matching",
@@ -268,20 +261,20 @@ describe("Profiles", async function () {
       it("update single element of the profile", async function () {
 
         let testProfile: ViyaProfile =
-          profileConfig.getProfileByName(testProfileName);
+          profileConfig.getProfileByName(testProfileName) as ViyaProfile;
         testProfile.endpoint = "https://test2-host.sas.com";
-        profileConfig.upsertProfile(testProfileName, testProfile);
-        testProfile = profileConfig.getProfileByName(testProfileName);
+        await profileConfig.upsertProfile(testProfileName, testProfile);
+        testProfile = profileConfig.getProfileByName(testProfileName) as ViyaProfile;
 
-        expect(testProfile.endpoint).to.equal("https://test2-host.sas.com");
-        expect(testProfile.clientId).to.equal("sas.test");
+        expect(testProfile?.endpoint).to.equal("https://test2-host.sas.com");
+        expect(testProfile?.clientId).to.equal("sas.test");
         expect(testProfile).to.not.have.any.keys("tokenFile");
       });
     });
 
     describe("Validate Profile", async function () {
       it("set active profile", async function () {
-        profileConfig.updateActiveProfileSetting(testProfileName);
+        await profileConfig.updateActiveProfileSetting(testProfileName);
 
         const testProfile = profileConfig.getActiveProfile();
         expect(testProfileName).to.equal(
@@ -291,10 +284,10 @@ describe("Profiles", async function () {
       });
 
       it("get active profile", async function () {
-        profileConfig.updateActiveProfileSetting(testProfileName);
+        await profileConfig.updateActiveProfileSetting(testProfileName);
         const activeProfileName = profileConfig.getActiveProfile();
         const activeProfile: ViyaProfile =
-          profileConfig.getProfileByName(activeProfileName);
+          profileConfig.getProfileByName(activeProfileName) as ViyaProfile;
 
         expect(activeProfileName).to.equal(
           testProfileName,
@@ -310,7 +303,7 @@ describe("Profiles", async function () {
         const profileByName = profileConfig.getProfileByName(testProfileName);
         const validateProfile = profileConfig.validateProfile({
           name: testProfileName,
-          profile: profileByName,
+          profile: profileByName as ViyaProfile,
         });
 
         expect(validateProfile.data).to.equal(undefined);
@@ -330,14 +323,8 @@ describe("Profiles", async function () {
     beforeEach(async () => {
       testProfileName = "testProfile";
       testProfileNewName = "testProfile2";
-      initProfile();
-      workspace
-        .getConfiguration(EXTENSION_CONFIG_KEY)
-        .update(
-          EXTENSION_DEFINE_PROFILES_CONFIG_KEY,
-          testEmptyProfile,
-          ConfigurationTarget.Global,
-        );
+      await initProfile();
+      await updateProfileSetting(testEmptyProfile);
     });
     describe("CRUD Operations", async function () {
       it("add a new profile", async function () {
@@ -346,7 +333,7 @@ describe("Profiles", async function () {
           context: "SAS Studio context",
           connectionType: ConnectionType.Rest,
         };
-        profileConfig.upsertProfile(testProfileNewName, newProfile);
+        await profileConfig.upsertProfile(testProfileNewName, newProfile);
         const profiles = profileConfig.listProfile();
 
         expect(profiles).to.have.length(
@@ -360,7 +347,7 @@ describe("Profiles", async function () {
       });
 
       it("delete a profile", async function () {
-        profileConfig.deleteProfile(testProfileName);
+        await profileConfig.deleteProfile(testProfileName);
 
         const profiles = profileConfig.listProfile();
         expect(profiles).to.have.length(0);
@@ -368,7 +355,7 @@ describe("Profiles", async function () {
 
       it("get profile by name", async function () {
         const testProfile: ViyaProfile =
-          profileConfig.getProfileByName(testProfileName);
+          profileConfig.getProfileByName(testProfileName) as ViyaProfile;
 
         expect(testProfile.endpoint).to.equal(
           undefined,
@@ -392,15 +379,9 @@ describe("Profiles", async function () {
         const newProfileSetting = testEmptyProfile;
         newProfileSetting.profiles[testProfileName].endpoint =
           "https://test2-host.sas.com";
-        workspace
-          .getConfiguration(EXTENSION_CONFIG_KEY)
-          .update(
-            EXTENSION_DEFINE_PROFILES_CONFIG_KEY,
-            newProfileSetting,
-            ConfigurationTarget.Global,
-          );
+        await updateProfileSetting(newProfileSetting);
         let testProfile = profileConfig.getProfileByName(testProfileName);
-        expect(testProfile.endpoint).to.equal("https://test2-host.sas.com");
+        expect(testProfile?.endpoint).to.equal("https://test2-host.sas.com");
       });
     });
 
@@ -408,7 +389,7 @@ describe("Profiles", async function () {
       it("validate no active profile when only name sent in", async function () {
         const validateProfile = profileConfig.validateProfile({
           name: testProfileName,
-          profile: undefined,
+          profile: undefined as unknown as ViyaProfile,
         });
 
         expect(validateProfile.data).to.equal(undefined);
@@ -437,18 +418,12 @@ describe("Profiles", async function () {
   describe("Overloaded Profile", async function () {
     beforeEach(async () => {
       testProfileName = "testProfile";
-      initProfile();
-      workspace
-        .getConfiguration(EXTENSION_CONFIG_KEY)
-        .update(
-          EXTENSION_DEFINE_PROFILES_CONFIG_KEY,
-          testOverloadedProfile,
-          ConfigurationTarget.Global,
-        );
+      await initProfile();
+      await updateProfileSetting(testOverloadedProfile);
     });
     describe("Validate Profiles", async function () {
       it("set active profile", async function () {
-        profileConfig.updateActiveProfileSetting(testProfileName);
+        await profileConfig.updateActiveProfileSetting(testProfileName);
         const activeProfile = profileConfig.getActiveProfile();
 
         expect(activeProfile).to.equal(
@@ -458,10 +433,10 @@ describe("Profiles", async function () {
       });
 
       it("get active profile", async function () {
-        profileConfig.updateActiveProfileSetting(testProfileName);
+        await profileConfig.updateActiveProfileSetting(testProfileName);
         const activeProfileName = profileConfig.getActiveProfile();
         const activeProfile: ViyaProfile =
-          profileConfig.getProfileByName(activeProfileName);
+          profileConfig.getProfileByName(activeProfileName) as ViyaProfile;
 
         expect(activeProfileName).to.equal(
           testProfileName,
@@ -480,7 +455,7 @@ describe("Profiles", async function () {
         // Act
         const validateProfile = profileConfig.validateProfile({
           name: testProfileName,
-          profile: profileByName,
+          profile: profileByName as ViyaProfile,
         });
 
         // Overloaded file should take authcode as precedence
@@ -501,18 +476,12 @@ describe("Profiles", async function () {
   describe("Empty Item Profile", async function () {
     beforeEach(async () => {
       testProfileName = "testProfile";
-      initProfile();
-      workspace
-        .getConfiguration(EXTENSION_CONFIG_KEY)
-        .update(
-          EXTENSION_DEFINE_PROFILES_CONFIG_KEY,
-          testEmptyItemsProfile,
-          ConfigurationTarget.Global,
-        );
+      await initProfile();
+      await updateProfileSetting(testEmptyItemsProfile);
     });
     describe("Validate Profiles", async function () {
       it("set active profile", async function () {
-        profileConfig.updateActiveProfileSetting(testProfileName);
+        await profileConfig.updateActiveProfileSetting(testProfileName);
         const testProfile = profileConfig.getActiveProfile();
 
         expect(testProfile).to.equal(
@@ -522,10 +491,10 @@ describe("Profiles", async function () {
       });
 
       it("get active profile", async function () {
-        profileConfig.updateActiveProfileSetting(testProfileName);
+        await profileConfig.updateActiveProfileSetting(testProfileName);
         const activeProfileName = profileConfig.getActiveProfile();
         const activeProfile: ViyaProfile =
-          profileConfig.getProfileByName(activeProfileName);
+          profileConfig.getProfileByName(activeProfileName) as ViyaProfile;
 
         expect(activeProfileName).to.equal(
           testProfileName,

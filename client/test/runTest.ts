@@ -16,7 +16,7 @@ async function main() {
     await runTests({
       extensionDevelopmentPath,
       extensionTestsPath,
-      launchArgs: ["--disable-extensions"],
+      launchArgs: ["--disable-extensions", "--user-data-dir", `${path.resolve(__dirname, "../../../.user-data-dir-test")}`],
     });
   } catch (err) {
     console.error("Failed to run tests");
