@@ -25,7 +25,6 @@ import {
 import {
   REPOSITORY_FILE_MEDIA_TYPE,
   REPOSITORY_ITEM_MEDIA_TYPE,
-
   ObjectType,
   Permission,
   Privilege,
@@ -47,12 +46,12 @@ import {
 import { getContextValue } from '../ExtensionContext';
 
 export class RepositoryModel {
-  private connection: AxiosInstance;
+  private connection!: AxiosInstance;
   private fileTokenMaps: {
     [id: string]: { etag: string; lastModified: string };
   };
   private authorized: boolean;
-  private delegateFolders: { [name: string]: RepositoryItem };
+  private readonly delegateFolders: { [name: string]: RepositoryItem };
   private objectTypes: ObjectType[];
 
   constructor() {
@@ -68,7 +67,7 @@ export class RepositoryModel {
       (response: AxiosResponse) => response,
       async (error: AxiosError) => {
         const originalRequest: AxiosRequestConfig & { _retry?: boolean } =
-          error.config;
+          error.config as AxiosRequestConfig;
 
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
@@ -107,8 +106,8 @@ export class RepositoryModel {
 
     const itemId = !item ? "1" : item.id;
     let start = 0;
-    const limit = 100;
-    const url = `${REPOSITORY_ITEMS}/${itemId}/children?start=${start}&limit=${limit}`;
+    const limit = 500;
+    const url = `${REPOSITORY_ITEMS}/${itemId}/children?start=${start}&limit=${limit}&includeSynchronizationInfo=true`;
 
     const response = await this.connection.get(url);
     let items = response.data.items;
@@ -130,15 +129,15 @@ export class RepositoryModel {
 
     return items.map((childItem: RepositoryItem) => ({
       ...childItem,
-      uid: !item ? '1' : `${item.id}`,
+      uid: item ? `${item.id}` : '1',
     }));
   }
 
   public async getParent(item: RepositoryItem): Promise<RepositoryItem | undefined> {
     if (item) {
-      const ancestorsLink = null;
+      const ancestorsLink: any = null;
       if (!ancestorsLink) {
-        return;
+        return undefined;
       }
       const response = await this.connection.get(ancestorsLink.uri);
       if (response.data && response.data.length > 0) {
@@ -160,10 +159,10 @@ export class RepositoryModel {
     return response.data;
   }
 
-  public async getResourceById(id: string): Promise<RepositoryItem> | undefined {
+  public async getResourceById(id: string): Promise<RepositoryItem | RepositoryFile | undefined> {
     try {
       const response = await this.connection.get(
-        `${REPOSITORY_ITEMS}/${id}`
+        `${REPOSITORY_ITEMS}/${id}?includeSynchronizationInfo=true`
       );
       this.fileTokenMaps[id] = {
         etag: response.headers.etag,
@@ -171,11 +170,11 @@ export class RepositoryModel {
       };
 
       return response.data;
-    } catch (error) {
-      if (error.response.status === 404 || error.response.status === 403) {
+    } catch (error: any) {
+      if (error.response?.status === 404 || error.response?.status === 403) {
         window.showErrorMessage(Messages.AccessError);
       }
-      return;
+      return undefined;
     }
   }
 
@@ -223,8 +222,8 @@ export class RepositoryModel {
       }
 
       return response.data;
-    } catch (error) {
-      return error.response.data.message;
+    } catch (error: any) {
+      return error.response?.data?.message;
     }
   }
 
@@ -300,7 +299,7 @@ export class RepositoryModel {
     expand: boolean,
     comment?: string,
     version?: string,
-  ): Promise<RepositoryItem> {
+  ): Promise<RepositoryItem | undefined> {
     if (!item && !location) {
       return undefined;
     }
@@ -377,7 +376,7 @@ export class RepositoryModel {
     return this.objectTypes.find((type) => type.id === id)?.name;
   }
 
-  public async getPermission(item: RepositoryItem): Promise<Permission> {
+  public async getPermission(item: RepositoryItem): Promise<Permission | undefined> {
     if (!item) {
       return undefined;
     }
@@ -397,7 +396,7 @@ export class RepositoryModel {
     }
   }
 
-  public async getPrivilege(item: RepositoryItem): Promise<Privilege> | undefined {
+  public async getPrivilege(item: RepositoryItem): Promise<Privilege | undefined> {
     if (!item) {
       return undefined;
     }
@@ -418,7 +417,7 @@ export class RepositoryModel {
     }
   }
 
-  public async getVersionHistory(item: RepositoryItem): Promise<VersionHistoryResponse> | undefined {
+  public async getVersionHistory(item: RepositoryItem): Promise<VersionHistoryResponse | undefined> {
     if (!item) {
       return undefined;
     }
@@ -429,15 +428,15 @@ export class RepositoryModel {
         return Promise.reject();
       }
       return data;
-    } catch (error) {
-      if (error.response.status === 404 || error.response.status === 403) {
+    } catch (error: any) {
+      if (error.response?.status === 404 || error.response?.status === 403) {
         window.showErrorMessage(Messages.AccessError);
       }
-      return;
+      return undefined;
     }
   }
 
-  public async getVersionHistoryItem(id: string, versionNumber: string): Promise<RepositoryFile> {
+  public async getVersionHistoryItem(id: string, versionNumber: string): Promise<RepositoryFile | undefined> {
     if (!id) {
       return undefined;
     }
@@ -454,7 +453,7 @@ export class RepositoryModel {
   }
 
   public async performBatchAction(action: Action, body: ActionBody): Promise<string> {
-    const clientId: string = await getContextValue("clientId");
+    const clientId: string = await getContextValue("clientId") || "";
 
     try {
       const response = await this.connection.post(
@@ -462,15 +461,15 @@ export class RepositoryModel {
         body ?? {}
       );
       return this.getActionToken(response.headers);
-    } catch (error) {
-      if (error.response.status === 404 || error.response.status === 403) {
+    } catch (error: any) {
+      if (error.response?.status === 404 || error.response?.status === 403) {
         window.showErrorMessage(Messages.AccessError);
       }
-      return;
+      return "";
     }
   }
 
-  private getActionToken = (headers): string => {
+  private readonly getActionToken = (headers: any): string => {
     if (headers.location) {
       const parts = headers.location.split('/');
       return parts[parts.length - 1];

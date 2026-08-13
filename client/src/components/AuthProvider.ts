@@ -11,6 +11,7 @@ import {
   SecretStorage,
   commands,
   workspace,
+  l10n,
 } from "vscode";
 
 import { profileConfig } from "../commands/profile";
@@ -97,7 +98,7 @@ export class SASAuthProvider implements AuthenticationProvider, Disposable {
 
     const tokens = await refreshToken(profile, {
       access_token: session.accessToken,
-      refresh_token: session.refreshToken,
+      refresh_token: session.refreshToken || "",
     });
     if (!tokens) {
       // refresh token failed, the stored session is not valid anymore
@@ -114,12 +115,15 @@ export class SASAuthProvider implements AuthenticationProvider, Disposable {
     return [newSession];
   }
 
-  async createSession(): Promise<AuthenticationSession> {
+  async createSession(scopes?: readonly string[]): Promise<AuthenticationSession> {
     const activeProfile = profileConfig.getActiveProfileDetail();
+    if (!activeProfile) {
+      throw new Error(l10n.t("No active profile"));
+    }
     const profile = activeProfile.profile;
 
     if (profile.connectionType !== ConnectionType.Rest) {
-      return;
+      throw new Error(l10n.t("Connection is not rest type"));
     }
 
     const { access_token: accessToken, refresh_token: refreshToken } =
@@ -134,7 +138,7 @@ export class SASAuthProvider implements AuthenticationProvider, Disposable {
       account: { id: user.id, label: user.name },
       accessToken,
       refreshToken,
-      scopes: [],
+      scopes: scopes ? scopes : [],
     };
 
     await this.writeSession(session);

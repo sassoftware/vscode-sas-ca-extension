@@ -6,7 +6,7 @@ import { getSession } from "../connection";
 import { Session } from "../connection/session";
 
 export async function closeSession(message?: string): Promise<void> {
-  let session: Session;
+  let session: Session | undefined;
   try {
     session = getSession();
   } catch {

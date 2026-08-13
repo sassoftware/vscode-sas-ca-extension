@@ -27,7 +27,7 @@ export interface Config extends BaseConfig {
 }
 
 class RestSession extends Session {
-  private _config: Config;
+  private _config!: Config;
   private _computeSession: ComputeSession | undefined;
 
   public set config(value: Config) {
@@ -83,7 +83,7 @@ class RestSession extends Session {
     if (this._config.serverId) {
       const server1 = new ComputeServer(this._config.serverId);
       server1.options = formattedOpts;
-      server1.autoExecLines = this._config.autoExecLines;
+      server1.autoExecLines = this._config.autoExecLines || [];
       this._computeSession = await server1.getSession();
 
       //Maybe wait for session to be initialized?
@@ -160,7 +160,7 @@ class RestSession extends Session {
       always returned.
     */
     for (const result of results.reverse()) {
-      const link = result.links[0];
+      const link = result.links?.[0];
       if (link?.type === "text/html") {
         const html5 = (await job.requestLink<string>(link)).data;
 
@@ -179,16 +179,16 @@ class RestSession extends Session {
 
   public close = async () => {
     if (this.sessionId()) {
-      this._computeSession.delete();
+      this._computeSession?.delete();
       this._computeSession = undefined;
 
       //Since the session is being closed, remove the cached session id
-      setContextValue("SAS.ClinicalAcceleration.sessionId", undefined);
+      setContextValue("SAS.ClinicalAcceleration.sessionId", undefined as unknown as string);
     }
   };
 
   public sessionId = (): string => {
-    return this._computeSession?.sessionId;
+    return this._computeSession?.sessionId || "";
   };
 
   public cancel = async (): Promise<void> => {
@@ -212,6 +212,9 @@ class RestSession extends Session {
    * @returns formatted SAS Options
    */
   private formatSASOptions = (): string[] => {
+    if (!this._config.sasOptions) {
+      return [];
+    }
     const formattedOpts = this._config.sasOptions.map((opt) => {
       let formatted = opt;
       formatted = formatted.replace(/=/gi, " ");
@@ -220,15 +223,15 @@ class RestSession extends Session {
     return formattedOpts;
   };
 
-  private reconnectComputeSession = async (): Promise<ComputeSession> => {
-    let session: ComputeSession = undefined;
+  private reconnectComputeSession = async (): Promise<ComputeSession | undefined> => {
+    let session: ComputeSession | undefined;
 
     if (!this._config.reconnect) {
       return undefined;
     }
 
     //Grab the sessionId
-    const sessionId: string = await getContextValue("SAS.ClinicalAcceleration.sessionId");
+    const sessionId: string | undefined = await getContextValue("SAS.ClinicalAcceleration.sessionId");
 
     if (sessionId === undefined) {
       //No sessionId in the cache means nothing to reconnect to
@@ -264,7 +267,7 @@ class RestSession extends Session {
 
     if (session === undefined) {
       //If we tried to reconnect and failed, set the cached sessionId to undefined
-      setContextValue("SAS.ClinicalAcceleration.sessionId", undefined);
+      setContextValue("SAS.ClinicalAcceleration.sessionId", undefined as unknown as string);
     }
 
     return session;
@@ -277,7 +280,9 @@ class RestSession extends Session {
   private printJobLog = async (job: ComputeJob) => {
     const logs = await job.getLogStream();
     for await (const log of logs) {
-      this._onLogFn(log);
+      if (this._onLogFn) {
+        this._onLogFn(log);
+      }
     }
   };
 
@@ -289,7 +294,7 @@ class RestSession extends Session {
     if (this._onLogFn) {
       const logs = await session.getLogStream();
       for await (const log of logs) {
-        this._onLogFn(log);
+        this._onLogFn?.(log);
       }
     }
   };

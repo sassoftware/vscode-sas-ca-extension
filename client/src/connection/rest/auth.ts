@@ -27,6 +27,7 @@ export async function refreshToken(
       accessToken: tokens.access_token,
     }),
   );
+  let updatedTokens: Tokens | undefined = tokens;
   await rootApi.headersForRoot().catch((err) => {
     if (err.response?.status === 401) {
       // token expired, try refresh token
@@ -42,23 +43,23 @@ export async function refreshToken(
         )
         .then(
           (res) => {
-            tokens = res.data;
+            updatedTokens = res.data;
           },
           () => {
             // refresh token failed, has to login again
-            tokens = undefined;
+            updatedTokens = undefined;
           },
         );
     }
     throw err;
   });
 
-  return tokens;
+  return updatedTokens;
 }
 
 export async function getTokens(
   config: Config,
-  tokens?: Tokens,
+  _tokens?: Tokens,
 ): Promise<Tokens> {
   const clientId = config.clientId || "vscode";
   const clientSecret = config.clientSecret ?? "";
@@ -83,7 +84,7 @@ export async function getTokens(
   );
 
   const cancellationToken = new CancellationTokenSource();
-  let authCode: string;
+  let authCode: string | undefined;
   const handler = window.registerUriHandler({
     handleUri: (uri) => {
       const code = new URLSearchParams(uri.query).get("code");
@@ -109,7 +110,7 @@ export async function getTokens(
     throw new Error(l10n.t("No authorization code"));
   }
 
-  tokens = (
+  const newTokens = (
     await axios.post(
       `${config.endpoint}/SASLogon/oauth/token`,
       new URLSearchParams({
@@ -121,7 +122,7 @@ export async function getTokens(
       }).toString(),
     )
   ).data;
-  return tokens;
+  return newTokens;
 }
 
 function getPKCE() {

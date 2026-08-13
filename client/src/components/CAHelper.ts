@@ -7,18 +7,18 @@ import * as https from "https";
 import * as tls from "tls";
 
 export const installCAs = () => {
-  const certFiles: string[] = workspace
+  const certFiles: string[] | undefined = workspace
     .getConfiguration("SAS.ClinicalAcceleration")
     .get("userProvidedCertificates");
   if (!certFiles?.length) {
     return;
   }
 
-  const userCertificates = [];
+  const userCertificates: string[] = [];
   for (const filename of certFiles) {
     if (filename?.length) {
       try {
-        userCertificates.push(fs.readFileSync(filename));
+        userCertificates.push(fs.readFileSync(filename, "utf8"));
       } catch (error) {
         console.log(`Failed to read user provided certificate`, error);
       }

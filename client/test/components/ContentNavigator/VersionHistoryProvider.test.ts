@@ -7,15 +7,17 @@ import {
 
 import axios, { AxiosInstance, HeadersDefaults } from "axios";
 import { expect } from "chai";
+import os from "os";
+import path from "path";
 import * as sinon from "sinon";
 import { StubbedInstance, stubInterface } from "ts-sinon";
 
-import VersionHistoryProvider from "../../../src/components/RepositoryNavigator/VersionHistoryProvider";
-import { RepositoryModel } from "../../../src/components/RepositoryNavigator/RepositoryModel";
-import { RepositoryFile, RepositoryItem, VersionHistoryItem, VersionHistoryResponse, } from "../../../src/components/RepositoryNavigator/types";
-import { getVersionUri } from '../../../src/components/RepositoryNavigator/utils';
+import VersionHistoryProvider from "../../../src/components/ContentNavigator/VersionHistoryProvider";
+import { RepositoryModel } from "../../../src/components/ContentNavigator/RepositoryModel";
+import { RepositoryFile, RepositoryItem, VersionHistoryItem, VersionHistoryResponse, } from "../../../src/components/ContentNavigator/types";
+import { getVersionUri } from '../../../src/components/ContentNavigator/utils';
 
-let stub;
+let stub: any;
 let axiosInstance: StubbedInstance<AxiosInstance>;
 
 const mockVersionHistoryItem = (
@@ -61,6 +63,7 @@ const mockRepositoryItem = (): RepositoryItem => ({
   modifiedTimeStamp: "2024-05-04T17:22:59.000Z",
   eTag: "",
   versioned: false,
+  syncable: 'ALLOW',
 });
 
 const mockRepositoryFile = (
@@ -70,9 +73,13 @@ const mockRepositoryFile = (
   digest: "",
   locked: false,
   signingStatus: "NONE",
-  fileVersion: null,
-  majorVersionLimit: null,
-  minorVersionLimit: null,
+  checkedOut: false,
+  checkedOutBy: "",
+  checkedOutByDisplayName: "",
+  checkedOutTimestamp: "",
+  fileVersion: undefined as unknown as string,
+  majorVersionLimit: undefined as unknown as number,
+  minorVersionLimit: undefined as unknown as number,
   contentType: "application/octet-stream",
   fileSize: 123,
   ...repositoryItem,
@@ -85,7 +92,7 @@ const createDataProvider = () => {
 };
 
 describe("VersionHistoryProvider", async function () {
-  let authStub;
+  let authStub: any;
   beforeEach(() => {
     authStub = sinon.stub(authentication, "getSession").resolves({
       accessToken: "12345",
@@ -96,10 +103,10 @@ describe("VersionHistoryProvider", async function () {
 
     axiosInstance = stubInterface<AxiosInstance>();
     axiosInstance.interceptors.response = {
-      use: () => null,
-      eject: () => null,
-      clear: () => null,
-    };
+      use: () => 0,
+      eject: () => undefined,
+      clear: () => undefined,
+    } as any;
     const headerDefaults: HeadersDefaults = {
       common: {
         Authorization: "",
@@ -122,7 +129,7 @@ describe("VersionHistoryProvider", async function () {
       stub.restore();
     }
     authStub.restore();
-    axiosInstance = undefined;
+    axiosInstance = undefined as any;
   });
 
   it("getVersionHistory - show the version for a mocked item", async () => {
@@ -182,6 +189,7 @@ describe("VersionHistoryProvider", async function () {
     });
 
     await dataProvider.connect("http://test.io");
-    await dataProvider.downloadResource(item, '${userHome}');
+    const downloadPath = path.join(os.homedir(), 'test-version-download.sas');
+    await dataProvider.downloadResource(item, downloadPath);
   });
 });

@@ -2,7 +2,7 @@
   "name": "sas-ca",
   "displayName": "SAS Clinical Acceleration",
   "description": "SAS Clinical Acceleration Extension for VS Code",
-  "version": "0.1.7",
+  "version": "1.0.2",
   "categories": [
     "Programming Languages",
     "Data Science",
@@ -173,7 +173,7 @@
         "title": "%commands.SAS.addFolderResource%",
         "category": "SAS Clinical Acceleration",
         "icon": "$(new-folder)",
-        "enablement": "SAS.ClinicalAcceleration.containerSelected || (viewItem =~ /create/ && view == repositorydataprovider)"
+        "enablement": "SAS.ClinicalAcceleration.repositoryContainerSelected || (viewItem =~ /create/ && view == repositorydataprovider)"
       },
       {
         "command": "SAS.ClinicalAcceleration.renameRepositoryResource",
@@ -217,6 +217,11 @@
         "category": "SAS Clinical Acceleration"
       },
       {
+        "command": "SAS.ClinicalAcceleration.compareRepositoryResourceWithSelectedWorkspaceResource",
+        "title": "%commands.SAS.compareRepositoryWithSelectedWorkspace%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
         "command": "SAS.ClinicalAcceleration.compareSelectedRepositoryResources",
         "title": "%commands.SAS.compareSelected%",
         "category": "SAS Clinical Acceleration"
@@ -235,6 +240,143 @@
         "command": "SAS.ClinicalAcceleration.compareSelectedRepositoryVersionResources",
         "title": "%commands.SAS.compareSelected%",
         "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.refreshWorkspaceContent",
+        "title": "%commands.SAS.refresh%",
+        "category": "SAS Clinical Acceleration",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.collapseAllWorkspaceContent",
+        "title": "%commands.SAS.collapseAll%",
+        "category": "SAS Clinical Acceleration",
+        "icon": "$(collapse-all)"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.downloadWorkspaceResource",
+        "title": "%commands.SAS.download%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.refreshWorkspaceProperties",
+        "title": "%commands.SAS.refresh%",
+        "category": "SAS Clinical Acceleration",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.uploadWorkspaceResource",
+        "title": "%commands.SAS.upload%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.uploadAndExpandWorkspaceResource",
+        "title": "%commands.SAS.uploadAndExpand%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.deleteWorkspaceResource",
+        "title": "%commands.SAS.deleteResource%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.addWorkspaceFileResource",
+        "title": "%commands.SAS.addFileResource%",
+        "category": "SAS Clinical Acceleration",
+        "icon": "$(new-file)",
+        "enablement": "SAS.ClinicalAcceleration.oneWorkspaceItemSelected && (SAS.ClinicalAcceleration.workspaceContainerSelected || (viewItem =~ /create/ && view == workspacedataprovider))"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.addWorkspaceFolderResource",
+        "title": "%commands.SAS.addFolderResource%",
+        "category": "SAS Clinical Acceleration",
+        "icon": "$(new-folder)",
+        "enablement": "SAS.ClinicalAcceleration.oneWorkspaceItemSelected && (SAS.ClinicalAcceleration.workspaceContainerSelected || (viewItem =~ /create/ && view == workspacedataprovider))"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.renameWorkspaceResource",
+        "title": "%commands.SAS.renameResource%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.copyWorkspaceResourcePath",
+        "title": "%commands.SAS.copyPath%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.copyLatestVersion",
+        "title": "%commands.SAS.copyLatestVersion%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.copySpecificVersion",
+        "title": "%commands.SAS.copySpecificVersion%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.copyFolder",
+        "title": "%commands.SAS.copyFolder%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.copyFolderStructure",
+        "title": "%commands.SAS.copyFolderStructure%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.checkoutWithContent",
+        "title": "%commands.SAS.copyContent%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.checkoutWithoutContent",
+        "title": "%commands.SAS.withoutCopying%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.undoCheckoutRepositoryResource",
+        "title": "%commands.SAS.undoCheckOut%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.checkInWorkspaceResource",
+        "title": "%commands.SAS.checkIn%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.undoCheckoutWorkspaceResource",
+        "title": "%commands.SAS.undoCheckOut%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.selectWorkspaceResourceForComparison",
+        "title": "%commands.SAS.selectWorkspaceForComparison%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.compareWorkspaceResourceWithSelected",
+        "title": "%commands.SAS.compareWorkspaceWithSelected%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.compareWorkspaceResourceWithSelectedRepositoryResource",
+        "title": "%commands.SAS.compareWorkspaceWithSelectedRepository%",
+        "category": "SAS Clinical Acceleration"
+      },
+      {
+        "command": "SAS.ClinicalAcceleration.compareSelectedWorkspaceResources",
+        "title": "%commands.SAS.compareSelected%",
+        "category": "SAS Clinical Acceleration"
+      }
+    ],
+    "submenus": [
+      {
+        "id": "repository.copytoworkspace",
+        "label": "%commands.SAS.copyToWorkspace%"
+      },
+      {
+        "id": "repository.checkouttoworkspace",
+        "label": "%commands.SAS.checkOutToWorkspace%"
       }
     ],
     "menus": {
@@ -263,6 +405,26 @@
           "command": "SAS.ClinicalAcceleration.refreshRepositoryVersionHistory",
           "when": "view == versionhistoryprovider",
           "group": "navigation"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.addWorkspaceFileResource",
+          "when": "view == workspacedataprovider",
+          "group": "navigation@1"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.addWorkspaceFolderResource",
+          "when": "view == workspacedataprovider",
+          "group": "navigation@2"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.refreshWorkspaceContent",
+          "when": "view == workspacedataprovider",
+          "group": "navigation@3"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.collapseAllWorkspaceContent",
+          "when": "view == workspacedataprovider",
+          "group": "navigation@4"
         }
       ],
       "view/item/context": [
@@ -278,12 +440,12 @@
         },
         {
           "command": "SAS.ClinicalAcceleration.enableRepositoryResourceVersioning",
-          "when": "viewItem =~ /-unversioned/ && view == repositorydataprovider && SAS.ClinicalAcceleration.oneItemSelected",
+          "when": "viewItem =~ /-unversioned/ && view == repositorydataprovider && SAS.ClinicalAcceleration.oneRepositoryItemSelected",
           "group": "enableversiongroup@0"
         },
         {
           "command": "SAS.ClinicalAcceleration.disableRepositoryResourceVersioning",
-          "when": "viewItem =~ /-versioned/ && view == repositorydataprovider && SAS.ClinicalAcceleration.oneItemSelected",
+          "when": "viewItem =~ /-versioned/ && view == repositorydataprovider && SAS.ClinicalAcceleration.oneRepositoryItemSelected",
           "group": "enableversiongroup@0"
         },
         {
@@ -313,17 +475,22 @@
         },
         {
           "command": "SAS.ClinicalAcceleration.selectRepositoryResourceForComparison",
-          "when": "viewItem =~ /compare/ && view == repositorydataprovider && !SAS.ClinicalAcceleration.twoItemsSelected",
+          "when": "viewItem =~ /compare/ && view == repositorydataprovider && SAS.ClinicalAcceleration.oneRepositoryItemSelected",
           "group": "comparegroup@0"
         },
         {
           "command": "SAS.ClinicalAcceleration.compareRepositoryResourceWithSelected",
-          "when": "viewItem =~ /compare/ && view == repositorydataprovider && SAS.ClinicalAcceleration.itemSelected && !SAS.ClinicalAcceleration.twoItemsSelected",
+          "when": "viewItem =~ /compare/ && view == repositorydataprovider && SAS.ClinicalAcceleration.repositoryItemSelected && SAS.ClinicalAcceleration.oneRepositoryItemSelected",
+          "group": "comparegroup@1"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.compareRepositoryResourceWithSelectedWorkspaceResource",
+          "when": "viewItem =~ /compare/ && view == repositorydataprovider && SAS.ClinicalAcceleration.workspaceItemSelected && SAS.ClinicalAcceleration.oneRepositoryItemSelected",
           "group": "comparegroup@1"
         },
         {
           "command": "SAS.ClinicalAcceleration.compareSelectedRepositoryResources",
-          "when": "viewItem =~ /compare/ && view == repositorydataprovider && SAS.ClinicalAcceleration.twoItemsSelected",
+          "when": "viewItem =~ /compare/ && view == repositorydataprovider && SAS.ClinicalAcceleration.twoRepositoryItemsSelected",
           "group": "comparegroup@2"
         },
         {
@@ -345,6 +512,99 @@
           "command": "SAS.ClinicalAcceleration.downloadRepositoryResourceVersion",
           "when": "view == versionhistoryprovider",
           "group": "updowngroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.compareRepositoryVersionWithSelected",
+          "when": "viewItem =~ /version/ && view == versionhistoryprovider && SAS.ClinicalAcceleration.versionSelected && !SAS.ClinicalAcceleration.twoVersionItemsSelected",
+          "group": "comparegroup@1"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.copySpecificVersion",
+          "when": "viewItem =~ /version/ && view == versionhistoryprovider && !SAS.ClinicalAcceleration.twoVersionItemsSelected",
+          "group": "copyto@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.undoCheckoutRepositoryResource",
+          "when": "(viewItem =~ /create/ || (viewItem =~ /compare/ && viewItem =~ /checkedOut/ && viewItem =~ /coBySelf/)) && view == repositorydataprovider",
+          "group": "checkoutgroup@0"
+        },
+        {
+          "submenu": "repository.copytoworkspace",
+          "group": "copygroup@1"
+        },
+        {
+          "submenu": "repository.checkouttoworkspace",
+          "group": "checkoutgroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.addWorkspaceFileResource",
+          "when": "viewItem =~ /create/ && view == workspacedataprovider && SAS.ClinicalAcceleration.oneWorkspaceItemSelected",
+          "group": "addgroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.addWorkspaceFolderResource",
+          "when": "viewItem =~ /create/ && view == workspacedataprovider && SAS.ClinicalAcceleration.oneWorkspaceItemSelected",
+          "group": "addgroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.copyWorkspaceResourcePath",
+          "when": "view == workspacedataprovider",
+          "group": "copygroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.renameWorkspaceResource",
+          "when": "viewItem =~ /update/ && view == workspacedataprovider",
+          "group": "renamegroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.deleteWorkspaceResource",
+          "when": "viewItem =~ /delete/ && view == workspacedataprovider",
+          "group": "renamegroup@1"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.downloadWorkspaceResource",
+          "when": "view == workspacedataprovider",
+          "group": "updowngroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.uploadWorkspaceResource",
+          "when": "viewItem =~ /create/ && view == workspacedataprovider && SAS.ClinicalAcceleration.oneWorkspaceItemSelected",
+          "group": "updowngroup@1"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.uploadAndExpandWorkspaceResource",
+          "when": "viewItem =~ /create/ && view == workspacedataprovider && SAS.ClinicalAcceleration.oneWorkspaceItemSelected",
+          "group": "updowngroup@2"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.checkInWorkspaceResource",
+          "when": "(viewItem =~ /create/ || (viewItem =~ /compare/ && viewItem =~ /checkedOut/ && viewItem =~ /coBySelf/) || viewItem =~ /compare/ && viewItem =~ /notCheckedOut/) && view == workspacedataprovider",
+          "group": "checkingroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.undoCheckoutWorkspaceResource",
+          "when": "(viewItem =~ /create/ || (viewItem =~ /compare/ && viewItem =~ /checkedOut/ && viewItem =~ /coBySelf/)) && view == workspacedataprovider",
+          "group": "checkingroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.selectWorkspaceResourceForComparison",
+          "when": "viewItem =~ /compare/ && view == workspacedataprovider && SAS.ClinicalAcceleration.oneWorkspaceItemSelected",
+          "group": "comparegroup@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.compareWorkspaceResourceWithSelected",
+          "when": "viewItem =~ /compare/ && view == workspacedataprovider && SAS.ClinicalAcceleration.workspaceItemSelected && SAS.ClinicalAcceleration.oneWorkspaceItemSelected",
+          "group": "comparegroup@1"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.compareWorkspaceResourceWithSelectedRepositoryResource",
+          "when": "viewItem =~ /compare/ && view == workspacedataprovider && SAS.ClinicalAcceleration.repositoryItemSelected && SAS.ClinicalAcceleration.oneWorkspaceItemSelected",
+          "group": "comparegroup@1"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.compareSelectedWorkspaceResources",
+          "when": "viewItem =~ /compare/ && view == workspacedataprovider && SAS.ClinicalAcceleration.twoWorkspaceItemsSelected",
+          "group": "comparegroup@2"
         }
       ],
       "commandPalette": [
@@ -427,6 +687,127 @@
         {
           "when": "false",
           "command": "SAS.ClinicalAcceleration.disableRepositoryResourceVersioning"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.deleteWorkspaceResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.copyWorkspaceResourcePath"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.addWorkspaceFileResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.addWorkspaceFolderResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.renameWorkspaceResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.refreshWorkspaceContent"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.collapseAllWorkspaceContent"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.downloadWorkspaceResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.uploadWorkspaceResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.uploadAndExpandWorkspaceResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.refreshWorkspaceProperties"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.copyLatestVersion"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.copySpecificVersion"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.copyFolder"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.copyFolderStructure"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.checkoutWithContent"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.checkoutWithoutContent"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.checkInWorkspaceResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.undoCheckoutWorkspaceResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.undoCheckoutRepositoryResource"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.selectWorkspaceResourceForComparison"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.compareWorkspaceResourceWithSelected"
+        },
+        {
+          "when": "false",
+          "command": "SAS.ClinicalAcceleration.compareSelectedWorkspaceResources"
+        }
+      ],
+      "repository.copytoworkspace": [
+        {
+          "command": "SAS.ClinicalAcceleration.copyLatestVersion",
+          "when": "viewItem =~ /compare/ && view == repositorydataprovider",
+          "group": "copyto@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.copyFolder",
+          "when": "viewItem =~ /create/ && view == repositorydataprovider",
+          "group": "copyto@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.copyFolderStructure",
+          "when": "viewItem =~ /create/ && view == repositorydataprovider",
+          "group": "copyto@0"
+        }
+      ],
+      "repository.checkouttoworkspace": [
+        {
+          "command": "SAS.ClinicalAcceleration.checkoutWithContent",
+          "when": "(viewItem =~ /create/ || (viewItem =~ /compare/ && viewItem =~ /notCheckedOut/)) && view == repositorydataprovider",
+          "group": "checkout@0"
+        },
+        {
+          "command": "SAS.ClinicalAcceleration.checkoutWithoutContent",
+          "when": "(viewItem =~ /create/ || (viewItem =~ /compare/ && viewItem =~ /notCheckedOut/)) && view == repositorydataprovider",
+          "group": "checkout@0"
         }
       ]
     },
@@ -467,6 +848,11 @@
           "id": "sas-ca-content-get-started",
           "name": "%views.SAS.signIn%",
           "when": "(!SAS.ClinicalAcceleration.authorized && SAS.ClinicalAcceleration.connectionType == rest)"
+        },
+        {
+          "id": "workspacedataprovider",
+          "name": "%views.SAS.workspace%",
+          "when": "SAS.ClinicalAcceleration.authorized && SAS.ClinicalAcceleration.connectionType == rest"
         },
         {
           "id": "propertyprovider",

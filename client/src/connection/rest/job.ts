@@ -56,7 +56,7 @@ export class ComputeJob extends Compute {
     if (this._self.links === undefined) {
       await this.self();
     }
-    const link = this.getLink(this._self.links, linkName);
+    const link = this.getLink(this._self.links || [], linkName);
     if (link === undefined) {
       throw new Error(
         l10n.t("Job does not have '{linkName}' link", {
@@ -70,7 +70,7 @@ export class ComputeJob extends Compute {
 
   async getState(options?: stateOptions): Promise<string> {
     const parms: JobsApiGetJobStateRequest = {
-      sessionId: this._self.sessionId,
+      sessionId: this._self.sessionId || "",
       jobId: this.id,
       wait: options?.wait,
       ifNoneMatch: options?.onChange ? this.etag : undefined,
@@ -108,7 +108,7 @@ export class ComputeJob extends Compute {
     while (states.indexOf(state) === -1) {
       //Get a log page
       const resp = await this.logs.getJobLog({
-        sessionId: this._self.sessionId,
+        sessionId: this._self.sessionId || "",
         jobId: this.id,
         start: start,
         timeout: timeout,
@@ -133,9 +133,9 @@ export class ComputeJob extends Compute {
     //There is a chance that the job ended between our last read and now.
     //Need to make sure we clear out the log
 
-    let nextLink: Link = undefined;
+    let nextLink: Link | undefined = undefined;
     let resp = await this.logs.getJobLog({
-      sessionId: this._self.sessionId,
+      sessionId: this._self.sessionId || "",
       jobId: this.id,
       start: start,
       timeout: timeout,
@@ -173,16 +173,19 @@ export class ComputeJob extends Compute {
   Return job results
   */
   async results(type?: string): Promise<Result[]> {
-    const link = this.getLink(this._self.links, "results");
+    const link = this.getLink(this._self.links || [], "results");
+    if (!link) {
+      return [];
+    }
     const resp = await this.requestLink<ResultCollection>(link, {
       params: {
         filter: `eq(type,${type ?? "ODS"})`,
       },
     });
-    const count = resp.data.count;
-    const limit = resp.data.limit;
+    const count = resp.data.count || 0;
+    const limit = resp.data.limit || count;
     if (count <= limit) {
-      return resp.data.items;
+      return resp.data.items || [];
     }
 
     // get all pages
@@ -200,8 +203,8 @@ export class ComputeJob extends Compute {
     }
     const results = await throttle(requests, 3);
     return results.reduce(
-      (prev, resp) => prev.concat(resp.data.items),
-      resp.data.items,
+      (prev, resp) => prev.concat(resp.data.items || []),
+      resp.data.items || [],
     );
   }
 }

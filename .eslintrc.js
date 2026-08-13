@@ -25,10 +25,13 @@ module.exports = {
     eqeqeq: "error",
     "prefer-const": "error",
     "@typescript-eslint/dot-notation": "error",
-    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { argsIgnorePattern: "^_" },
+    ],
     "@typescript-eslint/consistent-type-assertions": [
       "error",
-      { assertionStyle: "never" },
+      { assertionStyle: "as" },
     ],
     curly: "error",
     "@typescript-eslint/no-explicit-any": "off",

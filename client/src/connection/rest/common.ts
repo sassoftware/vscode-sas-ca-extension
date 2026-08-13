@@ -1,10 +1,9 @@
 // Copyright © 2024, SAS Institute Inc., Cary, NC, USA.  All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 import { AxiosRequestConfig, AxiosResponse } from "axios";
-import {
-  format as formatMediaType,
-  parse as parseMediaType,
-} from "media-typer";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { format: formatMediaType, parse: parseMediaType } = require("media-typer");
 
 import { RequestArgs, createRequestFunction } from "./api/common";
 import { Link } from "./api/compute";
@@ -57,7 +56,7 @@ export function computeMediaType(type: string): string {
  * Base class for compute like objects
  */
 export class Compute {
-  etag: string;
+  etag?: string;
 
   async self<T>(): Promise<T> {
     throw new Error("Not implemented");
