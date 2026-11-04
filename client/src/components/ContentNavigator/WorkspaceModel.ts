@@ -4,6 +4,7 @@ import { Uri, authentication, window } from "vscode";
 
 import axios, {
   AxiosError,
+  AxiosHeaders,
   AxiosInstance,
   AxiosRequestConfig,
   AxiosResponse,
@@ -64,6 +65,14 @@ export class WorkspaceModel {
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
           await this.updateAccessToken();
+          // The failed request still carries the old Authorization header,
+          // which overrides the refreshed default, so replay it with the new one.
+          originalRequest.headers = AxiosHeaders.from(
+            originalRequest.headers as AxiosHeaders,
+          ).set(
+            "Authorization",
+            this.connection.defaults.headers.common.Authorization,
+          );
           return this.connection(originalRequest);
         }
 
