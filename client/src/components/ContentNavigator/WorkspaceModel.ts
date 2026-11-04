@@ -132,8 +132,10 @@ export class WorkspaceModel {
 
   public async getResourceByUri(uri: Uri): Promise<WorkspaceItem> {
     const filePath = uri.query.startsWith('path=') ? uri.query.substring(5) : uri.query;
+    // filePath already starts with "/", so don't add another one (that sends
+    // ".../items//PositLabs/..."). Encode it like the other item lookups do.
     const response = await this.connection.get(
-      `${WORKSPACE}/items/${filePath}`
+      `${WORKSPACE}/items${encodePath(filePath)}`
     );
     this.fileTokenMaps[filePath] = {
       etag: response.headers.etag,
