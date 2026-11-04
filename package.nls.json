@@ -43,6 +43,7 @@
   "configuration.SAS.ClinicalAcceleration.connectionProfiles.profiles": "SAS Connection Profiles",
   "configuration.SAS.ClinicalAcceleration.connectionProfiles.profiles.connectionType": "SAS Profile Connection Type",
   "configuration.SAS.ClinicalAcceleration.connectionProfiles.profiles.endpoint": "SAS Viya Connection Profile Endpoint",
+  "configuration.SAS.ClinicalAcceleration.connectionProfiles.profiles.context": "SAS Viya Compute Context",
   "configuration.SAS.ClinicalAcceleration.connectionProfiles.profiles.name": "SAS Connection Profile Name",
   "configuration.SAS.ClinicalAcceleration.userProvidedCertificates": "Provide trusted CA certificate files",
   "themes.SAS.dark": "SAS Dark",
